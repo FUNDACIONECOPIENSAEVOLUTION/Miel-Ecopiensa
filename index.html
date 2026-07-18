@@ -37,8 +37,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght=0,600;0,700;1,500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Librerías de AR, Audio y Visión Artificial -->
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image-three.prod.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
     <style>
         body {
@@ -155,7 +157,6 @@
                 <div class="lg:col-span-5 flex flex-col items-center text-center">
                     <div class="relative group max-w-sm w-full animate-float">
                         <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-500 to-eco rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
-                        <!-- We use padding and clear containment (w-full h-auto object-contain) to prevent any top cropping -->
                         <div class="relative bg-stone-950 p-3 rounded-2xl border border-amber-500/30 shadow-2xl flex items-center justify-center overflow-hidden">
                             <img id="label-image" 
                                  src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/5.png" 
@@ -270,17 +271,26 @@
             <!-- Navigation HUD inside AR Mode -->
             <div class="relative z-20 w-full p-4 flex flex-col items-center space-y-4 pb-8 pointer-events-none">
                 
+                <!-- Hand recognition status bar -->
+                <div class="bg-black/90 backdrop-blur border border-emerald-500/30 px-5 py-2 rounded-full text-xs text-stone-200 flex items-center gap-2.5 shadow-2xl animate-pulse">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span id="hand-status-dot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span id="hand-status-text" class="font-semibold text-[10px] tracking-wide uppercase">IA de Posado en Mano Activa</span>
+                </div>
+
                 <!-- Dynamic touch target feedback block -->
                 <div class="glass-premium border border-amber-400/40 px-5 py-3 rounded-2xl max-w-sm text-center shadow-2xl animate-bounce pointer-events-auto">
                     <p class="text-xs text-amber-300 font-bold flex items-center justify-center gap-1.5">
-                        <span>🐝</span> ¡Toca a la abeja tricolor!
+                        <span>🐝</span> ¡Pon tu mano o mantén presionado!
                     </p>
-                    <p class="text-[10px] text-stone-300 mt-1">Zumba con orgullo colombiano (Amarillo, Azul y Rojo) y escapará volando velozmente por todo el espacio al tocarla.</p>
+                    <p class="text-[10px] text-stone-300 mt-1">La abeja tricolor detectará tu mano y volará para posarse en ella emitiendo un ronroneo biomecánico de felicidad.</p>
                 </div>
 
                 <!-- Live capture metrics hud -->
                 <div class="flex items-center space-x-4 bg-black/90 backdrop-blur border border-white/10 px-5 py-2 rounded-full text-xs pointer-events-auto">
-                    <span class="text-stone-300"><i class="fa-solid fa-hand-pointer text-amber-400 mr-1.5"></i> Capturas: <strong id="ar-score" class="text-amber-400 text-sm">0</strong></span>
+                    <span class="text-stone-300"><i class="fa-solid fa-hand-pointer text-amber-400 mr-1.5"></i> Toques: <strong id="ar-score" class="text-amber-400 text-sm">0</strong></span>
                     <span class="text-stone-600">|</span>
                     <span class="text-eco-light"><i class="fa-solid fa-shield-heart mr-1.5"></i> Proyecto Social Activo</span>
                 </div>
@@ -496,7 +506,7 @@
                     </div>
                     <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
                         <span class="text-eco-light font-bold block mb-1">Férulas 3D Avanzadas</span>
-                        <p class="text-stone-400 text-[11px]">Estructuras de inmovilización ventiladas y ligeras para rehabilitación traumatológica.</p>
+                        <p class="text-stone-400 text-[11px]">Estructuras de inmovilización ventiladas y ligeras para rehabilitation traumatológica.</p>
                     </div>
                     <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
                         <span class="text-eco-light font-bold block mb-1">Bio-Gripper Flexible</span>
@@ -715,8 +725,21 @@
         let beeRotationYEnd = 0;
         let beeMidHeightOffset = 0;
 
+        // AI Hand Pose Recognition & Simulated Attraction Tracking
+        let handsDetector = null;
+        let lastHandInferenceTime = 0;
+        let lastHandTime = 0;
+        let handTargetPos = new THREE.Vector3();
+        let isHandDetected = false;
+        let isSimulatedHandActive = false;
+        let holographicTargetMesh = null;
+        let touchHoldPos = new THREE.Vector3();
+        let isTouchHolding = false;
+
         // Synth audio (Tone.js)
         let synth;
+        let purrSynth;
+        let lastPurrPlay = 0;
         let isTargetDetected = false;
 
         // Robust Fallback Handler for Ecopiensa Foundation Logo
@@ -824,6 +847,7 @@
             }, 180);
         }
 
+        // Sound Synthesizers (Buzzing and purring algorithms)
         function playBuzzSound() {
             try {
                 if (!synth) {
@@ -857,6 +881,59 @@
             }
         }
 
+        function playHappyPurr(isAttracted) {
+            try {
+                if (!purrSynth) {
+                    purrSynth = new Tone.MonoSynth({
+                        oscillator: { type: "sawtooth" },
+                        filter: { Q: 2, type: "lowpass", rolloff: -12 },
+                        envelope: { attack: 0.1, decay: 0.2, sustain: 0.8, release: 0.4 },
+                        filterEnvelope: { attack: 0.05, decay: 0.1, sustain: 0.5, baseFrequency: 80, octaves: 1.5 }
+                    }).toDestination();
+                    purrSynth.volume.value = -12; // soft volume
+                }
+                
+                const now = Tone.now();
+                if (now - lastPurrPlay > 0.18) {
+                    lastPurrPlay = now;
+                    const note = isAttracted ? "A1" : "E1"; // Low comforting frequency vibration
+                    purrSynth.triggerAttackRelease(note, "8n", now);
+                }
+            } catch (error) {
+                // ignore audio errors
+            }
+        }
+
+        // Active AI Hand Landmark Callback from MediaPipe Frame Capture
+        function onHandResults(results) {
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                
+                // Landmark 9 represents the MCP joint of the middle finger (the palm center)
+                const point = landmarks[9]; 
+                
+                // Convert normalized coordinates (0 to 1) to local coordinate range of the tracking canvas
+                const targetX = (point.x - 0.5) * 2.2;
+                const targetY = -(point.y - 0.5) * 1.8;
+                const targetZ = -0.35; // Position the land plane slightly forward of the tag
+                
+                handTargetPos.set(targetX, targetY, targetZ);
+                isHandDetected = true;
+                lastHandTime = clock.getElapsedTime();
+                
+                // Update UI text
+                document.getElementById('hand-status-dot').className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-500 animate-ping";
+                document.getElementById('hand-status-text').innerText = "Sensor de Mano IA Activo • ¡Mano Detectada!";
+            } else {
+                // Decelerate attraction if no hand is tracked in this frame
+                if (clock.getElapsedTime() - lastHandTime > 0.4) {
+                    isHandDetected = false;
+                    document.getElementById('hand-status-dot').className = "relative inline-flex rounded-full h-2 w-2 bg-amber-500 animate-pulse";
+                    document.getElementById('hand-status-text').innerText = "Sensor de Mano IA Activo • Esperando Mano o Presión";
+                }
+            }
+        }
+
         async function startAR() {
             navigateTo('ar');
             showToast("Modo Escaneo Activo", "Apunta la cámara a la etiqueta del tarro para proyectar la abeja en Realidad Aumentada.", "info");
@@ -868,6 +945,26 @@
             updateScannerHUDState(false);
 
             await Tone.start();
+
+            // Setup MediaPipe Hands Detector if available
+            try {
+                if (window.Hands) {
+                    handsDetector = new window.Hands({
+                        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+                    });
+                    handsDetector.setOptions({
+                        maxNumHands: 1,
+                        modelComplexity: 0, // 0 is fast, optimized for mobile CPU usage
+                        minDetectionConfidence: 0.6,
+                        minTrackingConfidence: 0.6
+                    });
+                    handsDetector.onResults(onHandResults);
+                } else {
+                    console.warn("MediaPipe Hands library not loaded from CDN.");
+                }
+            } catch (e) {
+                console.error("Failed to init MediaPipe: ", e);
+            }
 
             // Setup MindAR Three.js Wrapper pointing directly to the compiled target file
             try {
@@ -889,9 +986,25 @@
                 // Build Procedural tricolor bee model
                 buildTricolorBeeModel();
 
-                // Add procedural bee inside tracking anchor group (ID 0 matches targets.mind single target)
+                // Build Holographic Bio-Receptive Target indicator for hand landing
+                const ringGeo = new THREE.RingGeometry(0.08, 0.1, 32);
+                const ringMat = new THREE.MeshBasicMaterial({
+                    color: 0x10b981,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                holographicTargetMesh = new THREE.Mesh(ringGeo, ringMat);
+                const dotGeo = new THREE.SphereGeometry(0.015, 16, 16);
+                const dotMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+                const dot = new THREE.Mesh(dotGeo, dotMat);
+                holographicTargetMesh.add(dot);
+                holographicTargetMesh.rotation.x = Math.PI / 2; // Flat horizontal appearance
+
+                // Add procedural bee and holographic node inside tracking anchor group (ID 0 matches targets.mind single target)
                 const anchor = mindarThreeInstance.addAnchor(0);
                 anchor.group.add(beeGroup);
+                anchor.group.add(holographicTargetMesh);
 
                 // Dynamic visibility matching target status requested by the user
                 anchor.onTargetFound = () => {
@@ -911,34 +1024,66 @@
                 const raycaster = new THREE.Raycaster();
                 const mouse = new THREE.Vector2();
 
-                function handleARInteraction(event) {
-                    if (!isTargetDetected) return; // Ignore touch attempts when not tracked
+                const container = document.getElementById('canvas-container');
 
-                    let posX = 0;
-                    let posY = 0;
+                // Pointer Events for double-mode interaction (Raycast touch escape OR attract simulation)
+                container.addEventListener('pointerdown', (event) => {
+                    if (!isTargetDetected) return;
 
-                    if (event.touches && event.touches.length > 0) {
-                        posX = event.touches[0].clientX;
-                        posY = event.touches[0].clientY;
-                    } else {
-                        posX = event.clientX;
-                        posY = event.clientY;
-                    }
-
-                    mouse.x = (posX / window.innerWidth) * 2 - 1;
-                    mouse.y = -(posY / window.innerHeight) * 2 + 1;
+                    // 1. Raycast check if bee clicked directly
+                    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
                     raycaster.setFromCamera(mouse, camera);
                     const intersects = raycaster.intersectObjects(anchor.group.children, true);
 
+                    let beeHit = false;
                     if (intersects.length > 0) {
-                        onBeeClicked();
+                        // Check if intersect hits the actual bee, not the target ring
+                        intersects.forEach(hit => {
+                            let parent = hit.object;
+                            while (parent) {
+                                if (parent === beeGroup) {
+                                    beeHit = true;
+                                    break;
+                                }
+                                parent = parent.parent;
+                            }
+                        });
                     }
-                }
 
-                const container = document.getElementById('canvas-container');
-                container.addEventListener('mousedown', handleARInteraction);
-                container.addEventListener('touchstart', handleARInteraction);
+                    if (beeHit) {
+                        onBeeClicked();
+                    } else {
+                        // If not clicked on the bee, treat it as holding down a simulated hand target!
+                        isTouchHolding = true;
+                        updateSimulatedHandPos(event);
+                    }
+                });
+
+                container.addEventListener('pointermove', (event) => {
+                    if (isTouchHolding && isTargetDetected) {
+                        updateSimulatedHandPos(event);
+                    }
+                });
+
+                container.addEventListener('pointerup', () => {
+                    isTouchHolding = false;
+                    isSimulatedHandActive = false;
+                });
+
+                container.addEventListener('pointerleave', () => {
+                    isTouchHolding = false;
+                    isSimulatedHandActive = false;
+                });
+
+                function updateSimulatedHandPos(event) {
+                    // Convert screen pointer coordinates to local space
+                    const xNorm = (event.clientX / window.innerWidth - 0.5) * 2.2;
+                    const yNorm = -(event.clientY / window.innerHeight - 0.5) * 1.8;
+                    touchHoldPos.set(xNorm, yNorm, -0.35);
+                    isSimulatedHandActive = true;
+                }
 
                 // Start MindAR Engine
                 await mindarThreeInstance.start();
@@ -1144,7 +1289,7 @@
                 const part1 = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.35), legMaterial);
                 part1.rotation.z = isLeft ? -0.5 : 0.5;
                 part1.rotation.y = isLeft ? 0.2 : -0.2;
-                part1.position.set(isLeft ? -0.1 : 0.1, 0.3, 0.8);
+                part1.position.set(isLeft ? -0.1 : 0.3, 0.3, 0.8);
                 
                 antenna.add(part1);
                 antennaeGroup.add(antenna);
@@ -1186,63 +1331,118 @@
         function animateThreeJS(renderer, scene, camera) {
             const time = clock.getElapsedTime();
 
-            // 1. Dual Pair Wing flapping (flap speed scales dramatically if dashing)
-            const flapSpeed = isDashing ? 65 : 32;
-            
-            if (wings.length >= 4) {
-                // Flap left front
-                wings[0].rotation.z = -Math.abs(Math.sin(time * flapSpeed)) * 0.7 - 0.1;
-                // Flap left rear
-                wings[1].rotation.z = -Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 - 0.1;
-                // Flap right front
-                wings[2].rotation.z = Math.abs(Math.sin(time * flapSpeed)) * 0.7 + 0.1;
-                // Flap right rear
-                wings[3].rotation.z = Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 + 0.1;
+            // Run MediaPipe hands model on camera stream asynchronously inside thread
+            const videoEl = document.querySelector('#canvas-container video');
+            if (handsDetector && videoEl && videoEl.readyState === videoEl.HAVE_CURRENT_DATA) {
+                // Inference throttled to 12fps to ensure buttery performance
+                if (time - lastHandInferenceTime > 0.08) {
+                    lastHandInferenceTime = time;
+                    handsDetector.send({ image: videoEl }).catch(() => {});
+                }
             }
 
-            // 2. Leg twitching during flight
+            // Determine if a targeted landing zone (real hand or touch hold) is active
+            const handActive = isHandDetected || isSimulatedHandActive;
+            const activeTarget = isHandDetected ? handTargetPos : touchHoldPos;
+
+            if (handActive && isTargetDetected) {
+                // Reveal biological land ring
+                holographicTargetMesh.position.copy(activeTarget);
+                holographicTargetMesh.visible = true;
+                holographicTargetMesh.rotation.z = time * 2; // spin beautifully
+
+                const dist = beeGroup.position.distanceTo(activeTarget);
+
+                if (dist > 0.08) {
+                    // 1. Attraction Flight State: fly towards the target center
+                    beeGroup.position.lerp(activeTarget, 0.06);
+
+                    // Point head toward target smoothly
+                    const dir = new THREE.Vector3().subVectors(activeTarget, beeGroup.position).normalize();
+                    const targetAngle = Math.atan2(dir.x, dir.z);
+                    beeGroup.rotation.y = targetAngle;
+
+                    // Flapping rapidly during transit
+                    const flapSpeed = 52;
+                    wings[0].rotation.z = -Math.abs(Math.sin(time * flapSpeed)) * 0.7 - 0.1;
+                    wings[1].rotation.z = -Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 - 0.1;
+                    wings[2].rotation.z = Math.abs(Math.sin(time * flapSpeed)) * 0.7 + 0.1;
+                    wings[3].rotation.z = Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 + 0.1;
+
+                    playHappyPurr(true);
+                } else {
+                    // 2. Landed/Resting State: Sitting comfortably on user's hand
+                    beeGroup.position.copy(activeTarget);
+                    
+                    // Face slightly forward resting flatly
+                    beeGroup.rotation.set(0, beeGroup.rotation.y, 0);
+
+                    // Wings flap very gently like a calm breathing vibration
+                    const flapSpeed = 8;
+                    wings[0].rotation.z = -Math.abs(Math.sin(time * flapSpeed)) * 0.2 - 0.05;
+                    wings[1].rotation.z = -Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.15 - 0.05;
+                    wings[2].rotation.z = Math.abs(Math.sin(time * flapSpeed)) * 0.2 + 0.05;
+                    wings[3].rotation.z = Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.15 + 0.05;
+
+                    playHappyPurr(false);
+                }
+            } else {
+                // 3. Hovering & Escape Behaviors (No hand targeted)
+                holographicTargetMesh.visible = false;
+
+                // Wing flapping scales based on activity
+                const flapSpeed = isDashing ? 65 : 32;
+                
+                if (wings.length >= 4) {
+                    wings[0].rotation.z = -Math.abs(Math.sin(time * flapSpeed)) * 0.7 - 0.1;
+                    wings[1].rotation.z = -Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 - 0.1;
+                    wings[2].rotation.z = Math.abs(Math.sin(time * flapSpeed)) * 0.7 + 0.1;
+                    wings[3].rotation.z = Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 + 0.1;
+                }
+
+                if (isDashing) {
+                    const durationElapsed = time - dashStartTime;
+                    const progress = Math.min(durationElapsed / dashDuration, 1);
+                    
+                    // Smooth ease-out cubic interpolation curve
+                    const t = 1 - Math.pow(1 - progress, 3);
+
+                    // Parabolic curved coordinates mapping
+                    const currentPos = new THREE.Vector3();
+                    currentPos.lerpVectors(beeStartPos, beeEndPos, t);
+                    currentPos.y += Math.sin(progress * Math.PI) * beeMidHeightOffset;
+
+                    beeGroup.position.copy(currentPos);
+                    beeGroup.rotation.y = beeRotationYStart + (beeRotationYEnd - beeRotationYStart) * t;
+
+                    if (progress >= 1) {
+                        isDashing = false;
+                    }
+                } else {
+                    // Hovering organically over target plane
+                    const hoverOffset = new THREE.Vector3(
+                        Math.sin(time * 1.6) * 0.1,
+                        Math.cos(time * 1.2) * 0.08,
+                        Math.sin(time * 0.8) * 0.06
+                    );
+                    beeGroup.position.copy(hoverOffset);
+                    beeGroup.rotation.z = Math.sin(time * 1.8) * 0.05;
+                    beeGroup.rotation.x = Math.cos(time * 1.1) * 0.04;
+                }
+            }
+
+            // Leg twitching during flight
             if (legsGroup) {
                 legsGroup.children.forEach((leg, index) => {
                     leg.rotation.x = Math.sin(time * 6 + index) * 0.1;
                 });
             }
 
-            // 3. Antennae twitching
+            // Antennae twitching
             if (antennaeGroup) {
                 antennaeGroup.children.forEach((ant, index) => {
                     ant.rotation.y = Math.sin(time * 8 + index) * 0.12;
                 });
-            }
-
-            // 4. Dynamic Parabolic flight path interpolation
-            if (isDashing) {
-                const durationElapsed = time - dashStartTime;
-                const progress = Math.min(durationElapsed / dashDuration, 1);
-                
-                // Smooth ease-out cubic interpolation curve
-                const t = 1 - Math.pow(1 - progress, 3);
-
-                // Parabolic curved coordinates mapping
-                const currentPos = new THREE.Vector3();
-                currentPos.lerpVectors(beeStartPos, beeEndPos, t);
-                currentPos.y += Math.sin(progress * Math.PI) * beeMidHeightOffset;
-
-                beeGroup.position.copy(currentPos);
-                beeGroup.rotation.y = beeRotationYStart + (beeRotationYEnd - beeRotationYStart) * t;
-
-                if (progress >= 1) {
-                    isDashing = false;
-                }
-            } else {
-                // Smooth hovering idle state offsets
-                const hoverOffset = new THREE.Vector3(
-                    Math.sin(time * 1.6) * 0.1,
-                    Math.cos(time * 1.2) * 0.08,
-                    Math.sin(time * 0.8) * 0.06
-                );
-                beeGroup.position.copy(hoverOffset);
-                beeGroup.rotation.z = Math.sin(time * 1.8) * 0.05;
-                beeGroup.rotation.x = Math.cos(time * 1.1) * 0.04;
             }
 
             renderer.render(scene, camera);
