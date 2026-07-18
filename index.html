@@ -37,7 +37,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght=0,600;0,700;1,500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image-three.prod.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
     <style>
@@ -84,7 +84,6 @@
 
     <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-md pointer-events-none"></div>
 
-    <!-- MAIN APP NAVIGATION HEADER -->
     <header class="w-full py-4 px-6 glass-premium border-b border-amber-500/10 fixed top-0 left-0 z-40 transition-all duration-300">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('splash')">
@@ -116,7 +115,6 @@
 
     <main class="flex-grow pt-24">
 
-        <!-- VISTA 1: Bienvenida Onboarding de Escaneo QR -->
         <section id="view-splash" class="min-h-[85vh] flex flex-col items-center justify-center px-4 py-8 max-w-5xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
                 
@@ -181,26 +179,10 @@
             </div>
         </section>
 
-
         <!-- VISTA 2: Pantalla de Realidad Aumentada (Simulador y Cámara real sobrepuesta) -->
-        <section id="view-ar" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between">
+        <section id="view-ar" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between overflow-hidden">
             
-            <!-- Real-time viewport camera stream -->
-            <video id="ar-webcam" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover z-0 opacity-80" style="transform: scaleX(-1);"></video>
-            
-            <!-- Fallback background when camera permissions are disabled -->
-            <div id="ar-fallback-bg" class="absolute inset-0 z-0 bg-gradient-to-b from-amber-950 via-stone-900 to-black flex items-center justify-center">
-                <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:24px_24px]"></div>
-                <div class="text-center p-6 max-w-sm z-10">
-                    <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-3xl mx-auto mb-4 animate-pulse">
-                        <i class="fa-solid fa-mountain-sun"></i>
-                    </div>
-                    <h4 class="text-amber-400 font-bold mb-1">Visor Digital Activo</h4>
-                    <p class="text-xs text-stone-400">Mostrando el santuario ecológico virtual. Habilita el acceso a la cámara para la experiencia inmersiva AR.</p>
-                </div>
-            </div>
-
-            <!-- Interactivity Layer for Three.js WebGL rendering -->
+            <!-- Real-time viewport camera stream & ThreeJS output handled by MindAR -->
             <div id="canvas-container" class="absolute inset-0 z-10 cursor-pointer"></div>
 
             <!-- Header HUD inside AR Mode -->
@@ -278,7 +260,6 @@
             </div>
         </section>
 
-
         <!-- VISTA 3: Ficha Técnica, Propuesta Social Ecobiónica y Simulador Financiero -->
         <section id="view-product-info" class="hidden min-h-screen px-4 pb-20 max-w-6xl mx-auto space-y-24">
             
@@ -345,7 +326,6 @@
                     </div>
                 </div>
             </div>
-
 
             <!-- Bloque 2: Proyecto ECOBIÓNICA (Estructura oficial del documento docx) -->
             <div id="ecobionica" class="pt-12 border-t border-stone-900">
@@ -459,7 +439,6 @@
                 </div>
             </div>
 
-
             <!-- Bloque 3: Líneas Académicas e Investigación Biónica -->
             <div class="pt-12 border-t border-stone-900">
                 <div class="space-y-4 max-w-3xl mb-10">
@@ -497,7 +476,6 @@
                 </div>
             </div>
 
-
             <!-- Bloque 4: Alianzas Corporativas y Calculadora Interactiva de Metas -->
             <div class="pt-12 border-t border-stone-900 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                 
@@ -533,7 +511,7 @@
                 <div class="lg:col-span-6 bg-gradient-to-b from-amber-950/20 to-stone-900/20 p-6 rounded-2xl border border-amber-500/20 shadow-2xl space-y-6">
                     <div>
                         <h4 class="font-serif text-lg text-amber-400">Calculadora de Impacto Social</h4>
-                        <p class="text-[11px] text-stone-400">Mueve los parámetros para simular el impacto de tu donación de PET o compra institucional de Miel Ecopiensa.</p>
+                        <p class="text-[11px] text-stone-400">Mueve los parámetros para simular el impacto de tu donación de PET o compra de Miel Ecopiensa.</p>
                     </div>
 
                     <!-- Slider de Miel Comprada -->
@@ -571,7 +549,6 @@
                     </button>
                 </div>
             </div>
-
 
             <!-- Bloque 5: Contacto Directo Integrado -->
             <div id="contact" class="pt-12 border-t border-stone-900 grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -679,19 +656,23 @@
         </div>
     </footer>
 
-
     <!-- JAVASCRIPT & LOGICA DE LA APLICACIÓN -->
     <script>
+        // Map packaged Three.js to window.THREE so our existing procedural asset generator works perfectly
+        window.THREE = window.MINDAR.IMAGE.THREE;
+
         let activeView = 'splash';
-        let cameraStream = null;
         let arScore = 0;
 
-        // Three.js instances for fully interactive 3D Bee
-        let scene, camera, renderer, beeGroup, wings = [], legsGroup, antennaeGroup;
-        let animationFrameId = null;
+        // MindARThree core instance & ThreeJS nodes
+        let mindarThreeInstance = null;
+        let beeGroup = null;
+        let wings = [];
+        let legsGroup = null;
+        let antennaeGroup = null;
         let clock = new THREE.Clock();
 
-        // Interactive movement state variables (Organic Flight Dash)
+        // Interactive flight state variables (Organic Flight Dash)
         let isDashing = false;
         let dashStartTime = 0;
         const dashDuration = 0.9; // seconds
@@ -703,22 +684,7 @@
 
         // Synth audio (Tone.js)
         let synth;
-
-        // Computer Vision Label Detector State variables
         let isTargetDetected = false;
-        let cvInterval = null;
-        let scanProgress = 0;
-        const targetImageObj = new Image();
-        targetImageObj.crossOrigin = "anonymous";
-        // Directly pointing to the honey label
-        targetImageObj.src = "https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/5.png";
-
-        // Reference target color distribution signature
-        const targetSignature = {
-            orangeRatio: 0.42, // Golden honey border color
-            tricolorRatio: 0.14, // Colombian flag elements (abdomen)
-            darkRatio: 0.35 // Dark letters / background rings
-        };
 
         // Robust Fallback Handler for Ecopiensa Foundation Logo
         function handleLogoError(img) {
@@ -862,57 +828,112 @@
             navigateTo('ar');
             showToast("Modo Escaneo Activo", "Apunta la cámara a la etiqueta del tarro para proyectar la abeja en Realidad Aumentada.", "info");
 
-            const video = document.getElementById('ar-webcam');
-            const fallbackBg = document.getElementById('ar-fallback-bg');
-
             arScore = 0;
             document.getElementById('ar-score').innerText = arScore;
 
-            // Reset computer vision tracking state
             isTargetDetected = false;
             updateScannerHUDState(false);
 
-            // Request rear camera for maximum immersion
-            try {
-                const constraints = {
-                    video: { facingMode: "environment" },
-                    audio: false
-                };
-                cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
-                video.srcObject = cameraStream;
-                video.classList.remove('hidden');
-                fallbackBg.classList.add('opacity-40'); 
-                
-                // Initialize the background target scanning routine
-                startImageTrackingCV(video);
-            } catch (err) {
-                console.warn("Camera request blocked or unsupported: ", err);
-                video.classList.add('hidden');
-                fallbackBg.classList.remove('opacity-40'); 
-                showToast("Modo Simulador Activo", "Al no disponer de cámara, la abeja se mostrará automáticamente.", "info");
-                // Fallback: Enable bee immediately in simulator mode
-                isTargetDetected = true;
-                updateScannerHUDState(true);
-            }
-
             await Tone.start();
-            initThreeJS();
+
+            // Setup MindAR Three.js Wrapper pointing directly to the compiled target file
+            try {
+                mindarThreeInstance = new MINDAR.IMAGE.MindARThree({
+                    container: document.getElementById('canvas-container'),
+                    imageTargetSrc: 'https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/targets.mind'
+                });
+
+                const { renderer, scene, camera } = mindarThreeInstance;
+
+                // Configure scene lighting inside MindAR frame
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+                scene.add(ambientLight);
+
+                const spotLight = new THREE.SpotLight(0xfff7e6, 2.5);
+                spotLight.position.set(2, 5, 4);
+                scene.add(spotLight);
+
+                // Build Procedural tricolor bee model
+                buildTricolorBeeModel();
+
+                // Add procedural bee inside tracking anchor group (ID 0 matches targets.mind single target)
+                const anchor = mindarThreeInstance.addAnchor(0);
+                anchor.group.add(beeGroup);
+
+                // Dynamic visibility matching target status requested by the user
+                anchor.onTargetFound = () => {
+                    isTargetDetected = true;
+                    playLockSound();
+                    updateScannerHUDState(true);
+                    showToast("¡Etiqueta Escaneada!", "Abeja 3D cargada sobre el tarro de miel.", "success");
+                };
+
+                anchor.onTargetLost = () => {
+                    isTargetDetected = false;
+                    updateScannerHUDState(false);
+                    showToast("Buscando Tarro...", "Apunta de nuevo a la etiqueta de miel para ver la abeja.", "info");
+                };
+
+                // Add touch raycasting onto canvas container inside MindAR loop
+                const raycaster = new THREE.Raycaster();
+                const mouse = new THREE.Vector2();
+
+                function handleARInteraction(event) {
+                    if (!isTargetDetected) return; // Ignore touch attempts when not tracked
+
+                    let posX = 0;
+                    let posY = 0;
+
+                    if (event.touches && event.touches.length > 0) {
+                        posX = event.touches[0].clientX;
+                        posY = event.touches[0].clientY;
+                    } else {
+                        posX = event.clientX;
+                        posY = event.clientY;
+                    }
+
+                    mouse.x = (posX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(posY / window.innerHeight) * 2 + 1;
+
+                    raycaster.setFromCamera(mouse, camera);
+                    const intersects = raycaster.intersectObjects(anchor.group.children, true);
+
+                    if (intersects.length > 0) {
+                        onBeeClicked();
+                    }
+                }
+
+                const container = document.getElementById('canvas-container');
+                container.addEventListener('mousedown', handleARInteraction);
+                container.addEventListener('touchstart', handleARInteraction);
+
+                // Start MindAR Engine
+                await mindarThreeInstance.start();
+
+                // Start animation frames
+                renderer.setAnimationLoop(() => {
+                    animateThreeJS(renderer, scene, camera);
+                });
+
+            } catch (err) {
+                console.error("Failed to boot MindAR: ", err);
+                showToast("Error de Acceso", "Asegúrate de otorgar permisos de cámara o recarga el navegador.", "error");
+                stopAR();
+            }
         }
 
         function stopAR() {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
-            }
-
-            if (cvInterval) {
-                clearInterval(cvInterval);
-                cvInterval = null;
-            }
-
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
+            if (mindarThreeInstance) {
+                try {
+                    mindarThreeInstance.stop();
+                    const { renderer } = mindarThreeInstance;
+                    if (renderer) {
+                        renderer.setAnimationLoop(null);
+                    }
+                } catch (e) {
+                    console.log("Cleanup handled cleanly: ", e);
+                }
+                mindarThreeInstance = null;
             }
 
             const canvasContainer = document.getElementById('canvas-container');
@@ -921,106 +942,6 @@
             }
 
             navigateTo('splash');
-        }
-
-        /**
-         * Dynamic Computer Vision Tracking Algorithm
-         * Continuously inspects video frames, comparing pixel hue distributions and Colombian flag colors
-         * to identify if the Miel Ecopiensa label is currently in the camera feed.
-         */
-        function startImageTrackingCV(videoElement) {
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = 64; // downsample to optimize tracking speed
-            tempCanvas.height = 64;
-
-            let consecutiveMatchCount = 0;
-            let consecutiveMissCount = 0;
-
-            cvInterval = setInterval(() => {
-                if (!videoElement || videoElement.paused || videoElement.ended) return;
-
-                // Draw current video frame onto analytical canvas
-                tempCtx.drawImage(videoElement, 0, 0, tempCanvas.width, tempCanvas.height);
-                const frameData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height).data;
-
-                let orangeCount = 0;
-                let yellowCount = 0;
-                let blueCount = 0;
-                let redCount = 0;
-                let darkCount = 0;
-                const totalPixels = tempCanvas.width * tempCanvas.height;
-
-                // Scan pixel hue distributions (optimized sample stride)
-                for (let i = 0; i < frameData.length; i += 16) {
-                    const r = frameData[i];
-                    const g = frameData[i + 1];
-                    const b = frameData[i + 2];
-
-                    // 1. Detect Amber/Orange (Honeycomb colors)
-                    if (r > 160 && g > 90 && g < 170 && b < 70) {
-                        orangeCount++;
-                    }
-                    // 2. Detect Pure Yellow (Abdomen flag band)
-                    else if (r > 200 && g > 160 && b < 80) {
-                        yellowCount++;
-                    }
-                    // 3. Detect Deep Blue (Abdomen flag band)
-                    else if (r < 75 && g < 110 && b > 140) {
-                        blueCount++;
-                    }
-                    // 4. Detect Red (Abdomen flag band)
-                    else if (r > 160 && g < 60 && b < 60) {
-                        redCount++;
-                    }
-                    // 5. Detect Dark space
-                    else if (r < 45 && g < 45 && b < 45) {
-                        darkCount++;
-                    }
-                }
-
-                // Compute distribution ratios
-                const samples = totalPixels / 4;
-                const orangeRatio = orangeCount / samples;
-                const darkRatio = darkCount / samples;
-                
-                // Colombian flag pattern indicator (Yellow, Blue, and Red occurring simultaneously in proximity)
-                const tricolorFactor = (yellowCount > 1 && blueCount > 1 && redCount > 1) ? 1.0 : 0.0;
-
-                // Scoring matrix
-                let matchScore = 0;
-                if (orangeRatio > 0.12) matchScore += 40; // label borders are present
-                if (darkRatio > 0.15) matchScore += 20; // high contrast details
-                if (tricolorFactor > 0.5) matchScore += 40; // Colombian tricolor core of the bee is detected
-
-                // Update real-time HUD progress bar
-                scanProgress = Math.min(100, Math.max(matchScore, Math.floor(Math.random() * 15 + 10)));
-                const progressBar = document.getElementById('scan-bar-progress');
-                if (progressBar) {
-                    progressBar.style.width = `${scanProgress}%`;
-                }
-
-                // State machine validation
-                if (matchScore >= 60) {
-                    consecutiveMatchCount++;
-                    consecutiveMissCount = 0;
-                    if (consecutiveMatchCount >= 2 && !isTargetDetected) {
-                        isTargetDetected = true;
-                        playLockSound();
-                        updateScannerHUDState(true);
-                        showToast("¡Etiqueta Escaneada!", "Abeja 3D cargada sobre el tarro de miel.", "success");
-                    }
-                } else {
-                    consecutiveMissCount++;
-                    consecutiveMatchCount = 0;
-                    if (consecutiveMissCount >= 5 && isTargetDetected) {
-                        isTargetDetected = false;
-                        updateScannerHUDState(false);
-                        showToast("Buscando Tarro...", "Apunta de nuevo a la etiqueta de miel para ver la abeja.", "info");
-                    }
-                }
-
-            }, 180);
         }
 
         function updateScannerHUDState(isLocked) {
@@ -1040,7 +961,6 @@
                     progressBar.style.width = "100%";
                 }
                 
-                // Set bee visibility inside ThreeJS group
                 if (beeGroup) {
                     beeGroup.visible = true;
                 }
@@ -1051,42 +971,16 @@
                 statusText.className = "text-xs text-red-400 font-bold tracking-wider uppercase drop-shadow";
                 if (progressBar) {
                     progressBar.className = "w-0 h-full bg-red-500 transition-all duration-200";
+                    progressBar.style.width = "0%";
                 }
                 
-                // Hide bee inside ThreeJS group
                 if (beeGroup) {
                     beeGroup.visible = false;
                 }
             }
         }
 
-        function initThreeJS() {
-            const container = document.getElementById('canvas-container');
-            container.innerHTML = ''; 
-
-            const width = container.clientWidth || window.innerWidth;
-            const height = container.clientHeight || window.innerHeight;
-
-            // Scene and Camera Setup
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-            camera.position.set(0, 0, 4.0);
-
-            // WebGL Renderer Setup
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            container.appendChild(renderer.domElement);
-
-            // Lighting Setup for realistic shadows and golden metallic sheen
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-            scene.add(ambientLight);
-
-            const spotLight = new THREE.SpotLight(0xfff7e6, 2.5);
-            spotLight.position.set(2, 5, 4);
-            scene.add(spotLight);
-
-            // 3D BEE PROCEDURAL ASSET GENERATION
+        function buildTricolorBeeModel() {
             beeGroup = new THREE.Group();
 
             // 1. Thorax (Realistic dark copper body with hair-like roughness)
@@ -1094,8 +988,7 @@
             const thoraxMat = new THREE.MeshStandardMaterial({
                 color: 0x2b1e10,
                 roughness: 0.65,
-                metalness: 0.35,
-                bumpScale: 0.05
+                metalness: 0.35
             });
             const thorax = new THREE.Mesh(thoraxGeo, thoraxMat);
             beeGroup.add(thorax);
@@ -1180,7 +1073,6 @@
                 legGroup.add(segment1);
                 legGroup.add(segment2);
                 
-                // Spread legs along thorax length
                 legGroup.position.z = -0.2 + (Math.floor(i / 2) * 0.22);
                 legsGroup.add(legGroup);
             }
@@ -1211,7 +1103,6 @@
                 side: THREE.DoubleSide
             });
 
-            // Wing sets (left big, left small, right big, right small)
             const createWing = (w, h, x, y, z, rotZ, rotY) => {
                 const wingGeo = new THREE.BoxGeometry(w, 0.01, h);
                 const wing = new THREE.Mesh(wingGeo, wingMat);
@@ -1220,206 +1111,124 @@
                 return wing;
             };
 
-            // Left side
+            wings = [];
             wings.push(createWing(0.9, 0.38, -0.65, 0.42, -0.05, -0.18, 0.2));  // Front Big Left
             wings.push(createWing(0.6, 0.26, -0.5, 0.35, -0.28, -0.22, 0.1));   // Rear Small Left
-            // Right side
             wings.push(createWing(0.9, 0.38, 0.65, 0.42, -0.05, 0.18, -0.2));   // Front Big Right
             wings.push(createWing(0.6, 0.26, 0.5, 0.35, -0.28, 0.22, -0.1));    // Rear Small Right
 
             wings.forEach(w => beeGroup.add(w));
 
-            // Set Initial safe location coordinate (Invisible by default until scanned)
-            beeGroup.position.set(0, 0, 1.0);
-            beeGroup.visible = isTargetDetected;
-            scene.add(beeGroup);
-
-            // Hovering dust elements (Pollen glow sparks)
-            const particleGeo = new THREE.BufferGeometry();
-            const particleCount = 60;
-            const posArray = new Float32Array(particleCount * 3);
-
-            for (let i = 0; i < particleCount * 3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 8;
-            }
-
-            particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const particleMat = new THREE.PointsMaterial({
-                size: 0.08,
-                color: 0xfabf24,
-                transparent: true,
-                opacity: 0.8
-            });
-
-            const particles = new THREE.Points(particleGeo, particleMat);
-            scene.add(particles);
-
-            // Raycasting logic for precision touch detection
-            const raycaster = new THREE.Raycaster();
-            const mouse = new THREE.Vector2();
-
-            function handleInteraction(event) {
-                if (!isTargetDetected) return; // Prevent clicking invisible bee
-
-                let posX = 0;
-                let posY = 0;
-
-                if (event.touches && event.touches.length > 0) {
-                    posX = event.touches[0].clientX;
-                    posY = event.touches[0].clientY;
-                } else {
-                    posX = event.clientX;
-                    posY = event.clientY;
-                }
-
-                mouse.x = (posX / window.innerWidth) * 2 - 1;
-                mouse.y = -(posY / window.innerHeight) * 2 + 1;
-
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(beeGroup.children, true);
-
-                if (intersects.length > 0) {
-                    onBeeClicked();
-                }
-            }
-
-            container.addEventListener('mousedown', handleInteraction);
-            container.addEventListener('touchstart', handleInteraction);
-
-            // Launch Animation Loop
-            animateThreeJS();
-            window.addEventListener('resize', onWindowResize);
+            // Setup scale matching the physical coordinate dimensions of targets.mind boundaries
+            beeGroup.scale.set(0.6, 0.6, 0.6);
+            beeGroup.position.set(0, 0, 0);
+            beeGroup.visible = false;
         }
 
-        function animateThreeJS() {
-            animationFrameId = requestAnimationFrame(animateThreeJS);
-
-            const elapsedTime = clock.getElapsedTime();
+        function animateThreeJS(renderer, scene, camera) {
             const time = clock.getElapsedTime();
 
             // 1. Dual Pair Wing flapping (flap speed scales dramatically if dashing)
             const flapSpeed = isDashing ? 65 : 32;
             
-            // Flap left front
-            wings[0].rotation.z = -Math.abs(Math.sin(time * flapSpeed)) * 0.7 - 0.1;
-            // Flap left rear
-            wings[1].rotation.z = -Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 - 0.1;
-            // Flap right front
-            wings[2].rotation.z = Math.abs(Math.sin(time * flapSpeed)) * 0.7 + 0.1;
-            // Flap right rear
-            wings[3].rotation.z = Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 + 0.1;
+            if (wings.length >= 4) {
+                // Flap left front
+                wings[0].rotation.z = -Math.abs(Math.sin(time * flapSpeed)) * 0.7 - 0.1;
+                // Flap left rear
+                wings[1].rotation.z = -Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 - 0.1;
+                // Flap right front
+                wings[2].rotation.z = Math.abs(Math.sin(time * flapSpeed)) * 0.7 + 0.1;
+                // Flap right rear
+                wings[3].rotation.z = Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 + 0.1;
+            }
 
-            // 2. Realistic Leg twitching during flight
-            legsGroup.children.forEach((leg, index) => {
-                leg.rotation.x = Math.sin(time * 6 + index) * 0.1;
-            });
+            // 2. Leg twitching during flight
+            if (legsGroup) {
+                legsGroup.children.forEach((leg, index) => {
+                    leg.rotation.x = Math.sin(time * 6 + index) * 0.1;
+                });
+            }
 
-            // 3. Realistic Antennae twitching
-            antennaeGroup.children.forEach((ant, index) => {
-                ant.rotation.y = Math.sin(time * 8 + index) * 0.12;
-            });
+            // 3. Antennae twitching
+            if (antennaeGroup) {
+                antennaeGroup.children.forEach((ant, index) => {
+                    ant.rotation.y = Math.sin(time * 8 + index) * 0.12;
+                });
+            }
 
-            // 4. Position and Navigation Management
+            // 4. Dynamic Parabolic flight path interpolation
             if (isDashing) {
-                // Dash linear interpolation progress
                 const durationElapsed = time - dashStartTime;
                 const progress = Math.min(durationElapsed / dashDuration, 1);
                 
                 // Smooth ease-out cubic interpolation curve
                 const t = 1 - Math.pow(1 - progress, 3);
 
-                // Create organic, curved trajectory path (avoiding simple straight lines)
+                // Parabolic curved coordinates mapping
                 const currentPos = new THREE.Vector3();
                 currentPos.lerpVectors(beeStartPos, beeEndPos, t);
-                
-                // Add vertical sine wave bounce in the middle of flight for organic arc
                 currentPos.y += Math.sin(progress * Math.PI) * beeMidHeightOffset;
 
-                // Update Position
                 beeGroup.position.copy(currentPos);
-                
-                // Dynamic Orientation turning towards heading
                 beeGroup.rotation.y = beeRotationYStart + (beeRotationYEnd - beeRotationYStart) * t;
 
-                // Stop Dash state when destination is successfully reached
                 if (progress >= 1) {
                     isDashing = false;
                 }
             } else {
-                // Smooth hovering wandering (Idle state wave offsets)
+                // Smooth hovering idle state offsets
                 const hoverOffset = new THREE.Vector3(
-                    Math.sin(time * 1.6) * 0.25,
-                    Math.cos(time * 1.2) * 0.22,
-                    Math.sin(time * 0.8) * 0.18
+                    Math.sin(time * 1.6) * 0.1,
+                    Math.cos(time * 1.2) * 0.08,
+                    Math.sin(time * 0.8) * 0.06
                 );
-                
-                // Gentle breathing tilt rotation
+                beeGroup.position.copy(hoverOffset);
                 beeGroup.rotation.z = Math.sin(time * 1.8) * 0.05;
                 beeGroup.rotation.x = Math.cos(time * 1.1) * 0.04;
-                beeGroup.rotation.y += Math.sin(time * 0.5) * 0.005; // natural slow rotate
             }
 
             renderer.render(scene, camera);
         }
 
-        function onWindowResize() {
-            if (!camera || !renderer) return;
-            const container = document.getElementById('canvas-container');
-            if (!container) return;
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-            renderer.setSize(width, height);
-        }
-
-        // Escape flight algorithm (Launches bee dynamically across entire 3D camera frustum)
+        // Escape flight algorithm (Launches bee dynamically across entire 3D tracking frame)
         function onBeeClicked() {
-            if (isDashing) return; // ignore clicks mid-flight
+            if (isDashing) return;
 
             arScore++;
             document.getElementById('ar-score').innerText = arScore;
 
-            // Synthesis sound trigger
             playBuzzSound();
 
-            // Trigger score bump animation
             const scoreBadge = document.getElementById('ar-score').parentElement;
             scoreBadge.classList.add('scale-125', 'text-amber-400');
             setTimeout(() => {
                 scoreBadge.classList.remove('scale-125', 'text-amber-400');
             }, 250);
 
-            // Compute massive dynamic flight vector
+            // Compute escape coordinates inside targets bounds
             isDashing = true;
             dashStartTime = clock.getElapsedTime();
 
-            // Store departure coordinates
             beeStartPos.copy(beeGroup.position);
             
-            // Randomize new safe view boundaries coordinates
-            const randX = (Math.random() - 0.5) * 2.8; // far left / far right
-            const randY = (Math.random() - 0.5) * 2.2; // up / down
-            const randZ = 0.5 + (Math.random() * 1.5); // near / far depth
+            // Safe target boundaries offsets (normalized)
+            const randX = (Math.random() - 0.5) * 1.2;
+            const randY = (Math.random() - 0.5) * 1.0;
+            const randZ = -0.2 + (Math.random() * 0.5);
 
             beeEndPos.set(randX, randY, randZ);
+            beeMidHeightOffset = (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.3);
 
-            // Height displacement for biological parabolic path
-            beeMidHeightOffset = (Math.random() > 0.5 ? 1 : -1) * (0.6 + Math.random() * 0.6);
-
-            // Calculate directional angle difference to rotate face-first towards next location
             const deltaX = randX - beeStartPos.x;
             const deltaZ = randZ - beeStartPos.z;
             
             beeRotationYStart = beeGroup.rotation.y;
             beeRotationYEnd = Math.atan2(deltaX, deltaZ);
 
-            // Toast achievements alerts
             if (arScore === 1) {
                 showToast("¡Buen reflejo!", "La abeja sintió tu toque y escapó con fuerza hacia otra posición.", "success");
             } else if (arScore === 5) {
-                showToast("¡Velocidad Apícola!", "Estás dominando la captura. Recuerda que este divertido juego representa la reubicación de abejas.", "success");
+                showToast("¡Velocidad Apícola!", "Estás dominando la captura. Recuerda que este juego representa la reubicación de abejas.", "success");
             }
         }
 
