@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Miel Ecopiensa - Realidad Aumentada & Impacto Social</title>
+    <title>Miel Ecopiensa - Realidad Aumentada & Impacto Ecobiónica</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS para el diseño responsivo -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -15,13 +15,14 @@
                         amber: {
                             50: '#fffbeb',
                             100: '#fef3c7',
+                            200: '#fde68a',
                             400: '#fbbf24',
                             500: '#f59e0b',
                             600: '#d97706',
                             900: '#78350f',
                         },
                         eco: {
-                            light: '#4ade80',
+                            light: '#34d399',
                             DEFAULT: '#10b981',
                             dark: '#047857',
                         }
@@ -34,46 +35,53 @@
         }
     </script>
     
-    <!-- Google Fonts & FontAwesome Icons -->
+    <!-- Google Fonts & FontAwesome Icons para el diseño premium -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght=0,600;0,700;1,500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Three.js (3D engine) and Tone.js (Interactive Sound synth) -->
+    <!-- Motores Interactivos: Three.js (3D) y Tone.js (Sintetizador de audio) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0c0a09;
+            background-color: #060504;
             color: #f5f5f4;
             overflow-x: hidden;
         }
         .font-serif {
             font-family: 'Playfair Display', serif;
         }
-        /* Custom golden glassmorphism */
+        /* Cristalografía dorada premium */
         .glass-premium {
-            background: rgba(20, 17, 14, 0.7);
+            background: rgba(18, 14, 10, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(245, 158, 11, 0.18);
+        }
+        /* Cristalografía verde ecológica */
+        .glass-eco {
+            background: rgba(6, 15, 12, 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.22);
         }
-        .glass-eco {
-            background: rgba(4, 120, 87, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-        /* Custom animations */
+        /* Animaciones fluidas para microinteracciones */
         @keyframes pulse-slow {
             0%, 100% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.05); opacity: 1; }
+            50% { transform: scale(1.03); opacity: 1; }
         }
         .animate-pulse-slow {
-            animation: pulse-slow 3s infinite ease-in-out;
+            animation: pulse-slow 4s infinite ease-in-out;
         }
-        /* Hide scrollbar but keep functionality */
+        @keyframes float-bee {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+        }
+        .animate-float {
+            animation: float-bee 6s infinite ease-in-out;
+        }
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -83,16 +91,14 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
 
-    <!-- Custom Toast Notification System -->
     <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-md pointer-events-none"></div>
 
-    <!-- Main Navigation / Header -->
     <header class="w-full py-4 px-6 glass-premium border-b border-amber-500/10 fixed top-0 left-0 z-40 transition-all duration-300">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('splash')">
-                <img src="logo ecopiensa traspaewncia.png" alt="Logo Ecopiensa" class="h-10 w-10 object-contain rounded-full bg-black/40 p-1 border border-eco" onerror="this.src='https://placehold.co/100x100/047857/ffffff?text=Ecopiensa'">
+                <img id="header-logo" src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png" alt="Logo Ecopiensa" class="h-10 w-10 object-contain rounded-full bg-black/40 p-1 border border-eco" onerror="this.src='logo ecopiensa traspaewncia.png'; this.onerror=function(){this.src='https://placehold.co/100x100/047857/ffffff?text=Ecopiensa'}">
                 <div>
                     <h1 class="text-sm font-bold text-amber-400 tracking-wider">ECOPIENSA</h1>
                     <p class="text-[9px] text-eco-light tracking-widest uppercase">Evolution</p>
@@ -100,42 +106,42 @@
             </div>
             <nav class="hidden md:flex space-x-6 text-sm font-medium">
                 <button onclick="navigateTo('splash')" class="hover:text-amber-400 transition">Inicio</button>
-                <button onclick="startAR()" class="text-amber-400 hover:text-amber-300 transition flex items-center gap-1">
+                <button onclick="startAR()" class="text-amber-400 hover:text-amber-300 transition flex items-center gap-1.5">
                     <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-ping"></span> Realidad Aumentada
                 </button>
                 <button onclick="navigateTo('product-info')" class="hover:text-amber-400 transition">Nuestra Miel</button>
-                <button onclick="scrollToSection('ecobionica')" class="hover:text-eco-light transition">Proyecto Ecobiónica</button>
+                <button onclick="scrollToSection('ecobionica')" class="hover:text-eco-light transition font-semibold">Ecobiónica</button>
+                <button onclick="scrollToSection('contact')" class="hover:text-amber-400 transition">Contacto</button>
             </nav>
-            <button onclick="startAR()" class="bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold px-4 py-2 rounded-full text-xs hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/20 flex items-center space-x-1">
+            <button onclick="startAR()" class="bg-gradient-to-r from-amber-500 to-amber-600 text-black font-extrabold px-4 py-2 rounded-full text-xs hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/20 flex items-center space-x-1.5">
                 <i class="fa-solid fa-camera"></i>
-                <span>Escanear Miel</span>
+                <span>Escanear Tarro</span>
             </button>
         </div>
     </header>
 
-    <!-- MAIN VIEWS CONTAINER -->
-    <main class="flex-grow pt-20">
+    <main class="flex-grow pt-24">
 
-        <!-- VIEW 1: Splash / Welcome Screen -->
+        <!-- VISTA 1: Bienvenida Onboarding de Escaneo QR -->
         <section id="view-splash" class="min-h-[85vh] flex flex-col items-center justify-center px-4 py-8 max-w-5xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
                 
-                <!-- Left: Label/Brand presentation -->
+                <!-- Presentación de la etiqueta física del producto -->
                 <div class="lg:col-span-5 flex flex-col items-center text-center">
-                    <div class="relative group max-w-sm w-full">
-                        <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-500 to-eco rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
-                        <div class="relative bg-black rounded-2xl overflow-hidden border border-amber-500/20 shadow-2xl">
-                            <!-- GitHub URL mapping to direct raw resource for label render -->
+                    <div class="relative group max-w-sm w-full animate-float">
+                        <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-500 to-eco rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                        <div class="relative bg-black rounded-2xl overflow-hidden border border-amber-500/30 shadow-2xl">
+                            <!-- Imagen de la etiqueta -->
                             <img id="label-image" src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/5.png" alt="Etiqueta Miel Ecopiensa" class="w-full h-auto object-cover max-h-[480px]" onerror="this.src='5.jpg'; this.onerror=function(){this.src='https://placehold.co/400x500/d97706/ffffff?text=Miel+Ecopiensa'}">
                         </div>
                     </div>
-                    <p class="text-xs text-amber-400/60 mt-3 italic"><i class="fa-solid fa-qrcode mr-1"></i> Escaneado exitosamente de tu tarro de miel</p>
+                    <p class="text-xs text-amber-400/70 mt-4 italic"><i class="fa-solid fa-qrcode mr-1.5"></i> Escaneado exitosamente del tarro de miel</p>
                 </div>
 
-                <!-- Right: Text copy & Call to actions -->
+                <!-- Copys promocionales y botones de navegación primaria -->
                 <div class="lg:col-span-7 flex flex-col justify-center space-y-6 text-center lg:text-left px-2">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 self-center lg:self-start">
-                        <i class="fa-solid fa-leaf text-eco"></i> Producto Social & Ambiental
+                        <i class="fa-solid fa-leaf text-eco"></i> Proyecto Apícola y Social de la Fundación
                     </span>
                     
                     <h2 class="text-3xl sm:text-5xl font-serif text-white leading-tight">
@@ -144,161 +150,163 @@
                     </h2>
 
                     <p class="text-stone-300 text-sm sm:text-base leading-relaxed">
-                        Un producto premium 100% natural recolectado de abejas rescatadas en reservas ecológicas de Cundinamarca. Cada gota de miel apoya directamente al programa <strong class="text-eco-light">ECOBIÓNICA</strong>, fabricando prótesis biónicas gratuitas para personas y animales utilizando plástico PET reciclado.
+                        ¡Bienvenido! Al escanear el código de tu tarro, has ingresado al círculo de conservación de la <strong>Fundación Ecopiensa Evolution</strong>. Disfrutas de un producto 100% puro y natural, recolectado de colmenas rescatadas en Cundinamarca, cuyo beneficio financia directamente el programa de prótesis biónicas <strong>ECOBIÓNICA</strong>.
                     </p>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                        <!-- CTA Option 1: Start AR -->
+                        <!-- OPCIÓN 1: Realidad Aumentada -->
                         <button onclick="startAR()" class="group relative flex flex-col items-center justify-center p-6 rounded-2xl glass-premium border-2 border-amber-500/30 hover:border-amber-400 transition duration-300 shadow-xl hover:shadow-amber-500/10 text-center">
                             <div class="absolute top-3 right-3 flex h-3 w-3">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
                             </div>
-                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black text-2xl mb-3 shadow-inner group-hover:scale-110 transition duration-300">
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black text-2xl mb-3 shadow-inner group-hover:scale-110 transition duration-300 animate-pulse">
                                 <i class="fa-solid fa-cube"></i>
                             </div>
                             <h3 class="text-base font-bold text-amber-300 group-hover:text-amber-200">Realidad Aumentada</h3>
-                            <p class="text-xs text-stone-400 mt-1">Interactúa con la abeja 3D sobre tu entorno real</p>
+                            <p class="text-xs text-stone-400 mt-1">Mira e interactúa con la abeja 3D flotando en tu espacio real</p>
                         </button>
 
-                        <!-- CTA Option 2: Details & Foundation -->
+                        <!-- OPCIÓN 2: Nuestro Producto e Impacto Social -->
                         <button onclick="navigateTo('product-info')" class="group flex flex-col items-center justify-center p-6 rounded-2xl glass-eco border border-eco/30 hover:border-eco transition duration-300 shadow-xl hover:shadow-eco/10 text-center">
                             <div class="w-14 h-14 rounded-full bg-gradient-to-br from-eco to-eco-dark flex items-center justify-center text-white text-2xl mb-3 shadow-inner group-hover:scale-110 transition duration-300">
                                 <i class="fa-solid fa-hands-holding-child"></i>
                             </div>
-                            <h3 class="text-base font-bold text-eco-light group-hover:text-white">Nuestro Impacto Social</h3>
-                            <p class="text-xs text-stone-400 mt-1">Conoce el origen de la miel y el proyecto de prótesis</p>
+                            <h3 class="text-base font-bold text-eco-light group-hover:text-white font-serif">Producto & Fundación</h3>
+                            <p class="text-xs text-stone-400 mt-1">Conoce el origen, características y el proyecto de prótesis</p>
                         </button>
                     </div>
 
-                    <!-- Footer / Nit info inside splash -->
                     <div class="flex items-center justify-center lg:justify-start space-x-4 pt-6 border-t border-stone-800 text-xs text-stone-400">
-                        <p><strong>Fundación Ecopiensa Evolution</strong> <span class="text-stone-500">|</span> NIT 900998128-1</p>
+                        <p><strong>Fundación Ecopiensa Evolution</strong> <span class="text-stone-600">|</span> NIT 900998128-1</p>
                     </div>
                 </div>
             </div>
         </section>
 
 
-        <!-- VIEW 2: Realidad Aumentada Canvas Overlay (Simulated camera and ThreeJS overlay) -->
+        <!-- VISTA 2: Pantalla de Realidad Aumentada (Simulador y Cámara real sobrepuesta) -->
         <section id="view-ar" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between">
             
-            <!-- Real-time WebCam feed -->
-            <video id="ar-webcam" autoplay playsinline class="absolute inset-0 w-full h-full object-cover z-0 opacity-80" style="transform: scaleX(-1);"></video>
+            <!-- Flujo de la cámara Web en tiempo real -->
+            <video id="ar-webcam" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover z-0 opacity-80" style="transform: scaleX(-1);"></video>
             
-            <!-- Fallback atmospheric background in case camera feed is rejected/unavailable -->
+            <!-- Fondo alterno digital por si la cámara no es concedida o el navegador carece de soporte -->
             <div id="ar-fallback-bg" class="absolute inset-0 z-0 bg-gradient-to-b from-amber-950 via-stone-900 to-black flex items-center justify-center">
-                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:24px_24px]"></div>
                 <div class="text-center p-6 max-w-sm z-10">
-                    <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl mx-auto mb-4 animate-pulse">
+                    <div class="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-3xl mx-auto mb-4 animate-pulse">
                         <i class="fa-solid fa-mountain-sun"></i>
                     </div>
-                    <h4 class="text-amber-400 font-bold mb-1">Cámara Inactiva</h4>
-                    <p class="text-xs text-stone-400">Mostrando entorno ecológico virtual. Activa la cámara en tu navegador para una mejor experiencia AR.</p>
+                    <h4 class="text-amber-400 font-bold mb-1">Visor Digital Activo</h4>
+                    <p class="text-xs text-stone-400">Mostrando el santuario ecológico virtual. Habilita el acceso a la cámara para la experiencia inmersiva AR.</p>
                 </div>
             </div>
 
-            <!-- Three.JS Overlay Layer -->
+            <!-- Capa sobrepuesta para el motor Three.js -->
             <div id="canvas-container" class="absolute inset-0 z-10 cursor-pointer"></div>
 
-            <!-- AR TOP BAR UI -->
+            <!-- Interfaz superior de AR -->
             <div class="relative z-20 w-full p-4 glass-premium flex items-center justify-between border-b border-white/5">
                 <div class="flex items-center space-x-3">
-                    <img src="logo ecopiensa traspaewncia.png" alt="Logo" class="h-8 w-8 rounded-full bg-black/50 border border-eco" onerror="this.src='https://placehold.co/100x100/047857/ffffff?text=E'">
+                    <img src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png" alt="Logo" class="h-8 w-8 rounded-full bg-black/50 border border-eco" onerror="this.src='logo ecopiensa traspaewncia.png'; this.onerror=function(){this.src='https://placehold.co/100x100/047857/ffffff?text=E'}">
                     <div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                            <h3 class="text-xs font-bold tracking-wider text-amber-400">ECO-AR LIVE</h3>
+                            <h3 class="text-xs font-bold tracking-wider text-amber-400">AR BEE-SANTUARIO</h3>
                         </div>
-                        <p class="text-[9px] text-stone-300">Modo Realidad Aumentada</p>
+                        <p class="text-[9px] text-stone-300">Modo Interactivo</p>
                     </div>
                 </div>
                 <button onclick="stopAR()" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full transition shadow-lg shadow-red-500/20">
-                    <i class="fa-solid fa-xmark mr-1"></i> Cerrar
+                    <i class="fa-solid fa-xmark mr-1.5"></i> Salir
                 </button>
             </div>
 
-            <!-- AR INTERACTIVE GAME BANNER / BOTTOM OVERLAYS -->
-            <div class="relative z-20 w-full p-4 flex flex-col items-center space-y-4">
+            <!-- Interfaz inferior de juego y avance -->
+            <div class="relative z-20 w-full p-4 flex flex-col items-center space-y-4 pb-8">
                 
-                <!-- Game Interactive Toast Prompt -->
+                <!-- Indicador de toque -->
                 <div class="glass-premium border border-amber-400/40 px-5 py-3 rounded-2xl max-w-sm text-center shadow-2xl animate-bounce">
                     <p class="text-xs text-amber-300 font-bold flex items-center justify-center gap-1.5">
-                        <span class="text-base">🐝</span> ¡Intenta tocar a la abeja en la pantalla!
+                        <span>🐝</span> ¡Intenta tocar a la abeja en la pantalla!
                     </p>
-                    <p class="text-[10px] text-stone-400 mt-1">La abeja zumbará y cambiará de posición rápidamente cuando la toques.</p>
+                    <p class="text-[10px] text-stone-300 mt-1">Zumbará de forma interactiva y volará rápidamente a otra posición al ser tocada.</p>
                 </div>
 
-                <!-- Stats Panel -->
-                <div class="flex items-center space-x-4 bg-black/80 backdrop-blur border border-white/10 px-4 py-2 rounded-full text-xs">
+                <!-- Registro estadístico de capturas -->
+                <div class="flex items-center space-x-4 bg-black/90 backdrop-blur border border-white/10 px-5 py-2 rounded-full text-xs">
                     <span class="text-stone-300"><i class="fa-solid fa-hand-pointer text-amber-400 mr-1.5"></i> Toques: <strong id="ar-score" class="text-amber-400 text-sm">0</strong></span>
                     <span class="text-stone-600">|</span>
-                    <span class="text-eco-light"><i class="fa-solid fa-leaf mr-1"></i> Abejas Rescatadas: <strong>+12k</strong></span>
+                    <span class="text-eco-light"><i class="fa-solid fa-shield-heart mr-1.5"></i> Proyecto Social Activo</span>
                 </div>
 
-                <!-- Main CTA to navigate to product page -->
-                <button onclick="stopAR(); navigateTo('product-info')" id="ar-continue-btn" class="w-full max-w-sm py-3.5 bg-gradient-to-r from-amber-500 via-yellow-500 to-eco text-black font-extrabold text-sm rounded-full shadow-2xl shadow-amber-500/20 hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2">
-                    <span>Continuar a Nuestro Producto</span>
+                <!-- Botón de continuación hacia detalles del producto -->
+                <button onclick="stopAR(); navigateTo('product-info')" id="ar-continue-btn" class="w-full max-w-sm py-3.5 bg-gradient-to-r from-amber-500 via-yellow-500 to-eco text-black font-extrabold text-sm rounded-full shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2">
+                    <span>Ver Nuestro Producto e Impacto</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </section>
 
 
-        <!-- VIEW 3: Product Description & Foundation Project -->
-        <section id="view-product-info" class="hidden min-h-screen px-4 pb-20 max-w-6xl mx-auto space-y-20">
+        <!-- VISTA 3: Ficha Técnica, Propuesta Social Ecobiónica y Simulador Financiero -->
+        <section id="view-product-info" class="hidden min-h-screen px-4 pb-20 max-w-6xl mx-auto space-y-24">
             
-            <!-- Section A: Hero Narrative / Organic Honey -->
+            <!-- Bloque 1: Atributos de Pureza e Historia de Rescate Apícola -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-8">
                 <div class="space-y-6">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        <i class="fa-solid fa-certificate"></i> Miel de Origen Garantizado
+                        <i class="fa-solid fa-certificate"></i> Origen y Pureza Científica
                     </span>
-                    <h2 class="text-3xl sm:text-5xl font-serif text-white">
-                        La Esencia del Santuario Apícola de Cundinamarca
+                    <h2 class="text-3xl sm:text-4xl font-serif text-white">
+                        La Miel Pura de Cundinamarca y su Misión de Conservación
                     </h2>
                     <p class="text-stone-300 text-sm sm:text-base leading-relaxed">
-                        Nuestra miel premium proviene enteramente del departamento de <strong class="text-amber-400">Cundinamarca</strong>. No es solo un endulzante natural, es el fruto de un riguroso esfuerzo de <strong>rescate y reubicación ambiental</strong>.
+                        Nuestra miel de abejas premium proviene en su totalidad de reservas ecológicas protegidas en el departamento de <strong class="text-amber-400">Cundinamarca</strong>. No es solo un endulzante excepcional, es el pilar de un riguroso esfuerzo de <strong>rescate y reubicación ambiental</strong>.
                     </p>
+                    
                     <div class="p-4 rounded-xl glass-premium border-l-4 border-amber-500 text-xs text-stone-300 leading-relaxed">
-                        <p class="font-bold text-amber-300 mb-1">🐝 El Éxodo de las Abejas Metropolitanas</p>
-                        Abejas rescatadas del peligro inminente en zonas residenciales e industriales de la congestionada ciudad de Bogotá son cuidadosamente trasladadas por biólogos y voluntarios hacia reservas naturales protegidas donde pueden polinizar y prosperar sin la amenaza del asfalto y los pesticidas.
+                        <p class="font-bold text-amber-300 mb-1">🐝 Traslado de Colmenas Metropolitanas</p>
+                        Abejas en riesgo inminente dentro de la congestionada ciudad de Bogotá son cuidadosamente rescatadas y transportadas por personal especializado a áreas de reserva de la sabana y bosques andinos, donde pueden multiplicarse, polinizar especies nativas y generar miel libre de los agroquímicos industriales y polución citadina.
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+
+                    <div class="grid grid-cols-2 gap-4 text-xs">
                         <div class="bg-stone-900/60 p-4 rounded-xl border border-stone-800">
-                            <h4 class="text-amber-400 font-bold text-lg">100% Pura</h4>
-                            <p class="text-xs text-stone-400">Sin aditivos, conservantes ni jarabes de azúcar.</p>
+                            <h4 class="text-amber-400 font-bold mb-1"><i class="fa-solid fa-flask"></i> 100% Pura y Cruda</h4>
+                            <p class="text-stone-400">Sin pasteurizar, sin jarabes de azúcar añadidos ni conservantes químicos.</p>
                         </div>
                         <div class="bg-stone-900/60 p-4 rounded-xl border border-stone-800">
-                            <h4 class="text-eco-light font-bold text-lg">Bio-Reserva</h4>
-                            <p class="text-xs text-stone-400">Hectáreas protegidas en el altiplano andino.</p>
+                            <h4 class="text-eco-light font-bold mb-1"><i class="fa-solid fa-tree"></i> Biodiversidad Andina</h4>
+                            <p class="text-stone-400">Polen floral recolectado en áreas forestales protegidas de altura.</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Imagen del tarro/etiqueta y soporte científico -->
                 <div class="relative flex justify-center">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-3xl blur opacity-25"></div>
+                    <div class="absolute -inset-1 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-3xl blur opacity-20"></div>
                     <div class="relative bg-stone-950 p-6 rounded-2xl border border-amber-500/20 max-w-md w-full shadow-2xl">
                         <h3 class="font-serif text-xl text-amber-400 mb-4 flex items-center justify-between">
                             <span>Sello de Pureza</span>
                             <i class="fa-solid fa-shield-halved text-eco-light"></i>
                         </h3>
-                        <ul class="space-y-3.5 text-xs text-stone-300">
-                            <li class="flex items-start gap-2.5">
+                        <ul class="space-y-4 text-xs text-stone-300">
+                            <li class="flex items-start gap-3">
                                 <i class="fa-solid fa-circle-check text-eco-light mt-0.5"></i>
-                                <span><strong>Investigaciones Científicas:</strong> Avalada por estudios de laboratorio que corroboran un altísimo índice de polen silvestre y antioxidantes naturales.</span>
+                                <span><strong>Estudios e Investigaciones:</strong> Análisis fisicoquímicos respaldan su pureza, densidad y alto porcentaje de antioxidantes y nutrientes bio-activos.</span>
                             </li>
-                            <li class="flex items-start gap-2.5">
+                            <li class="flex items-start gap-3">
                                 <i class="fa-solid fa-circle-check text-eco-light mt-0.5"></i>
-                                <span><a href="https://www.facebook.com/FundacionEecopiensaEvolution" target="_blank" class="text-amber-400 underline hover:text-amber-300"><i class="fa-brands fa-facebook"></i> Comunidad Apícola:</a> Registro y testimonios de la reubicación de panales con acompañamiento de la Corporación Autónoma Regional.</span>
+                                <span><strong>Sostenible:</strong> La compra de cada frasco financia los insumos de rescate (trajes, cajas de colmena, transporte) para la conservación de la biodiversidad local.</span>
                             </li>
-                            <li class="flex items-start gap-2.5">
+                            <li class="flex items-start gap-3">
                                 <i class="fa-solid fa-circle-check text-eco-light mt-0.5"></i>
-                                <span><strong>Apoyo a la Conservación:</strong> El traslado y monitoreo de abejas genera un impacto directo en la biodiversidad del altiplano, asegurando la polinización nativa.</span>
+                                <span><strong>Comunidad Transparente:</strong> Puedes monitorear nuestras jornadas de rescate directamente en nuestro <a href="https://www.facebook.com/FundacionEecopiensaEvolution" target="_blank" class="text-amber-400 underline font-semibold hover:text-amber-300">Facebook oficial</a>.</span>
                             </li>
                         </ul>
-                        <!-- Label Reference Graphic -->
                         <div class="mt-6 border-t border-stone-800 pt-4 flex items-center justify-between">
-                            <img src="logo ecopiensa traspaewncia.png" alt="Logo Ecopiensa" class="h-10 w-10 object-contain rounded-full bg-black border border-eco" onerror="this.src='https://placehold.co/100x100/047857/ffffff?text=E'">
+                            <img src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png" alt="Logo Ecopiensa" class="h-9 w-9 object-contain rounded-full bg-black border border-eco" onerror="this.src='logo ecopiensa traspaewncia.png'">
                             <span class="text-[10px] text-stone-500">Miel Ecopiensa Premium</span>
                         </div>
                     </div>
@@ -306,96 +314,106 @@
             </div>
 
 
-            <!-- Section B: Ecobionica & Recycled Prosthetics Project -->
-            <div id="ecobionica" class="pt-12 border-t border-stone-800">
+            <!-- Bloque 2: Proyecto ECOBIÓNICA (Estructura oficial del documento docx) -->
+            <div id="ecobionica" class="pt-12 border-t border-stone-900">
                 <div class="text-center max-w-3xl mx-auto space-y-4 mb-16">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-eco/10 text-eco-light border border-eco/20">
-                        <i class="fa-solid fa-flask-vial"></i> Programa Social de Alta Tecnología
+                        <i class="fa-solid fa-hand-holding-heart"></i> Compromiso de Ingeniería Social
                     </span>
                     <h2 class="text-3xl sm:text-5xl font-serif text-white">
                         Proyecto ECOBIÓNICA
                     </h2>
-                    <p class="text-stone-300 text-sm sm:text-base leading-relaxed">
+                    <p class="text-stone-300 text-sm sm:text-base italic">
                         “Damos Movilidad A Tu Vida, Con La Recuperación De Materiales Reciclables.”
                     </p>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                    <!-- Text details of bionic program -->
+                    
+                    <!-- Información de Identidad de la Fundación y Origen del programa -->
                     <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
                         <div class="space-y-4">
                             <h3 class="text-xl font-bold text-eco-light flex items-center gap-2">
-                                <i class="fa-solid fa-gears text-eco-light"></i> ¿Cómo nace el programa?
+                                <i class="fa-solid fa-gears"></i> Origen y Propósito de la Obra
                             </h3>
                             <p class="text-stone-300 text-sm leading-relaxed">
-                                Nuestro programa ECOBIONICA nace de nuestros viajes rurales en brigadas de salud con el Ejército Nacional y la Policía Nacional al percatarnos de que la población campesina vulnerable requiere años y gestiones costosas para acceder a una prótesis motriz especializada debido a la falta de cobertura médica especializada directa en sus zonas.
+                                El programa **ECOBIÓNICA** es liderado por la <strong>Fundación Ecopiensa Evolution</strong> (NIT 900998128-1). Nace a partir de brigadas de salud conjuntas con el Ejército Nacional y la Policía Nacional en zonas rurales del territorio nacional. 
                             </p>
                             <p class="text-stone-300 text-sm leading-relaxed">
-                                Para solucionar esta brecha, la <strong>Fundación Ecopiensa Evolution</strong> diseña, modela y fabrica prótesis personalizadas en 3D utilizando <strong>filamento plástico PET derivado de botellas recicladas</strong> que los recolectores de oficio recuperan en las calles de ciudades como Bogotá, Medellín y Tuluá.
+                                Al percatarse de las enormes esperas (a veces de años) y altos costos económicos que sufren campesinos vulnerables, militares heridos y personas de escasos recursos para acceder a prótesis médicas, decidimos innovar: **diseñar, modelar y fabricar prótesis totalmente gratuitas mediante impresión 3D**, empleando filamento termoplástico **PET reciclado**, obtenido del aprovechamiento de botellas plásticas descartadas.
                             </p>
                         </div>
 
-                        <!-- Objective Badge Cards -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Tarjetas de Alcance y Servicio del Programa -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                             <div class="glass-eco p-5 rounded-xl border border-eco/20 flex flex-col justify-between">
-                                <span class="text-eco-light font-bold text-sm block mb-1">Para Personas</span>
-                                <p class="text-xs text-stone-400">Creación de manos, dedos, extremidades superiores e inferiores y exoesqueletos de apoyo funcional, totalmente gratuitos.</p>
+                                <div>
+                                    <span class="text-eco-light font-bold text-sm block mb-1 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-user-injured"></i> Prótesis Humanas
+                                    </span>
+                                    <p class="text-stone-400 text-xs">
+                                        Diseño personalizado de miembros superiores (manos, dedos, extremidades mecánicas completas), inferiores (prótesis desde articulación de rodilla, pie, tobillo) y soportes funcionales de exoesqueleto.
+                                    </p>
+                                </div>
                             </div>
                             <div class="glass-eco p-5 rounded-xl border border-eco/20 flex flex-col justify-between">
-                                <span class="text-amber-400 font-bold text-sm block mb-1">Para Animales</span>
-                                <p class="text-xs text-stone-400">Diseñamos y adaptamos prótesis biónicas y carritos de apoyo motriz a la anatomía de mascotas amputadas o lesionadas.</p>
+                                <div>
+                                    <span class="text-amber-400 font-bold text-sm block mb-1 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-paw"></i> Prótesis de Mascotas
+                                    </span>
+                                    <p class="text-stone-400 text-xs">
+                                        Diseñamos dispositivos ortopédicos articulados y carritos de soporte adaptados a la morfología de perros, gatos y otras especies que han sufrido amputación o problemas motrices congénitos.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right Column: Interactive diagram or dynamic image cards -->
-                    <div class="lg:col-span-5 bg-gradient-to-b from-stone-900 to-black p-6 rounded-2xl border border-white/5 flex flex-col justify-between shadow-xl">
+                    <!-- Fases Técnicas y Mapa de Procesos de Reciclaje a Prótesis -->
+                    <div class="lg:col-span-5 bg-stone-900/40 p-6 rounded-2xl border border-stone-800/80 flex flex-col justify-between shadow-xl">
                         <div>
-                            <h4 class="text-stone-300 font-bold text-sm mb-4 uppercase tracking-wider flex items-center justify-between">
-                                <span>Fases del Proceso</span>
-                                <i class="fa-solid fa-recycle text-eco-light animate-spin-slow"></i>
+                            <h4 class="text-stone-300 font-bold text-xs mb-4 uppercase tracking-wider flex items-center justify-between">
+                                <span>Mapa de Procesos Ecobiónica</span>
+                                <i class="fa-solid fa-recycle text-eco-light animate-spin" style="animation-duration: 8s;"></i>
                             </h4>
-                            <!-- Vertical Process Map -->
-                            <div class="space-y-4 text-xs">
+                            
+                            <!-- Lista secuencial de proceso basada en el mapa oficial -->
+                            <div class="space-y-3 text-xs">
                                 <div class="flex items-start gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">1</span>
+                                    <span class="w-5 h-5 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">1</span>
                                     <div>
-                                        <p class="font-bold text-white">Donación de Reciclaje / Miel</p>
-                                        <p class="text-stone-400">Tú compras miel o las empresas donan material PET reciclado.</p>
+                                        <p class="font-bold text-white">Donación de Reciclaje / Compra de Miel</p>
+                                        <p class="text-stone-400 text-[11px]">Tú compras miel o aliados donan material reciclable.</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">2</span>
+                                    <span class="w-5 h-5 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">2</span>
                                     <div>
-                                        <p class="font-bold text-white">Estudio & Escaneo 3D</p>
-                                        <p class="text-stone-400">Escaneamos corporalmente el miembro afectado del beneficiario.</p>
+                                        <p class="font-bold text-white">Recolección, Clasificación e industrialización (E.C.A.)</p>
+                                        <p class="text-stone-400 text-[11px]">La Estación de Clasificación de la Fundación procesa el PET.</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">3</span>
+                                    <span class="w-5 h-5 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">3</span>
                                     <div>
-                                        <p class="font-bold text-white">Transformación Extrusión 3D</p>
-                                        <p class="text-stone-400">Las botellas recicladas se convierten en filamento plástico PET de alta resistencia.</p>
+                                        <p class="font-bold text-white">Transformación & Extrusión 3D</p>
+                                        <p class="text-stone-400 text-[11px]">Conversión física de botellas a filamentos de alta resistencia.</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
-                                    <span class="w-6 h-6 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">4</span>
+                                    <span class="w-5 h-5 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">4</span>
                                     <div>
-                                        <p class="font-bold text-white">Impresión & Entrega de Prótesis</p>
-                                        <p class="text-stone-400">Ensamblado de articulaciones y entrega 100% gratuita al beneficiario.</p>
+                                        <p class="font-bold text-white">Estudio, Modelado y Construcción</p>
+                                        <p class="text-stone-400 text-[11px]">Escaneo corporal 3D y manufactura a la medida del beneficiario.</p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Technical Training models -->
-                        <div class="mt-6 pt-4 border-t border-stone-800">
-                            <p class="text-[10px] text-stone-500 uppercase font-bold mb-2">Modelos Académicos y de Investigación</p>
-                            <div class="flex flex-wrap gap-1.5">
-                                <span class="bg-stone-800 text-stone-300 text-[9px] px-2 py-0.5 rounded">Bio-Cover 3D</span>
-                                <span class="bg-stone-800 text-stone-300 text-[9px] px-2 py-0.5 rounded">Mano Robótica</span>
-                                <span class="bg-stone-800 text-stone-300 text-[9px] px-2 py-0.5 rounded">Sensores Biológicos</span>
-                                <span class="bg-stone-800 text-stone-300 text-[9px] px-2 py-0.5 rounded">Férulas 3D</span>
+                                <div class="flex items-start gap-3">
+                                    <span class="w-5 h-5 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">5</span>
+                                    <div>
+                                        <p class="font-bold text-white">Entrega Gratuita al Beneficiario</p>
+                                        <p class="text-stone-400 text-[11px]">Instalación, soporte técnico y adaptación motriz.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -403,158 +421,189 @@
             </div>
 
 
-            <!-- Section C: Alliance Sponsoring & Purchase Simulator -->
-            <div class="pt-12 border-t border-stone-800 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <!-- Bloque 3: Líneas Académicas e Investigación Biónica -->
+            <div class="pt-12 border-t border-stone-900">
+                <div class="space-y-4 max-w-3xl mb-10">
+                    <h3 class="text-2xl font-serif text-white">Líneas de Investigación y Capacitación Ambiental</h3>
+                    <p class="text-xs text-stone-400">
+                        Creamos modelos académicos de enseñanza, semilleros corporativos y temarios listos para integrarse como electivas en universidades, centros de desarrollo tecnológico e instituciones aliadas:
+                    </p>
+                </div>
                 
-                <!-- Sponsoring list -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
+                        <span class="text-amber-500 font-bold block mb-1">Diseño Paramétrico 3D</span>
+                        <p class="text-stone-400 text-[11px]">Modelado avanzado de estructuras en Autodesk Fusion 360 optimizadas para impresión.</p>
+                    </div>
+                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
+                        <span class="text-amber-500 font-bold block mb-1">Construcción de Falanges Biomecánicas</span>
+                        <p class="text-stone-400 text-[11px]">Análisis de esfuerzos mecánicos y ensamble modular de dedos y articulaciones.</p>
+                    </div>
+                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
+                        <span class="text-amber-500 font-bold block mb-1">Sensores para Señales Biológicas</span>
+                        <p class="text-stone-400 text-[11px]">Diseño de circuitería electromiográfica para la lectura de impulsos musculares.</p>
+                    </div>
+                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
+                        <span class="text-eco-light font-bold block mb-1">Férulas 3D Avanzadas</span>
+                        <p class="text-stone-400 text-[11px]">Estructuras de inmovilización ventiladas y ligeras para rehabilitación traumatológica.</p>
+                    </div>
+                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
+                        <span class="text-eco-light font-bold block mb-1">Bio-Gripper Flexible</span>
+                        <p class="text-stone-400 text-[11px]">Pinzas robóticas inspiradas en anatomía orgánica para manipulación suave.</p>
+                    </div>
+                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
+                        <span class="text-eco-light font-bold block mb-1">Dispositivos Ortopédicos para Mascotas</span>
+                        <p class="text-stone-400 text-[11px]">Adaptación de chasis biomecánicos y carritos de arrastre ligeros.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Bloque 4: Alianzas Corporativas y Calculadora Interactiva de Metas -->
+            <div class="pt-12 border-t border-stone-900 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Beneficios de Alianza -->
                 <div class="lg:col-span-6 space-y-6">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        <i class="fa-solid fa-handshake"></i> Alianzas de Responsabilidad Social
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-eco/10 text-eco-light border border-eco/20">
+                        <i class="fa-solid fa-handshake"></i> Beneficios para Aliados Corporativos
                     </span>
-                    <h3 class="text-2xl sm:text-4xl font-serif text-white">
+                    <h3 class="text-2xl sm:text-3xl font-serif text-white">
                         ¿Cómo puede unirse tu Empresa o Institución?
                     </h3>
-                    <p class="text-stone-300 text-sm leading-relaxed">
-                        Buscamos alianzas con entidades públicas, privadas y universidades para lograr un impacto autosustentable en el tiempo. Tu patrocinio puede ser en equipamiento técnico, donación de materiales o patrocinio directo del programa.
+                    <p class="text-stone-300 text-xs sm:text-sm leading-relaxed">
+                        Buscamos alianzas para financiar y equipar nuestro taller (impresoras de alta velocidad de 400 mm/s, extrusoras de filamento, computadores de modelado y escáneres 3D manuales).
                     </p>
-                    
-                    <!-- Required Equipment Accordion list -->
-                    <div class="space-y-3 text-xs text-stone-300">
-                        <div class="bg-stone-900/40 p-3 rounded-xl border border-stone-800 flex items-center justify-between">
-                            <span class="flex items-center gap-2"><i class="fa-solid fa-print text-eco-light"></i> Impresoras 3D Ultrarrápidas</span>
-                            <span class="text-[10px] bg-eco-dark/30 text-eco-light px-2 py-0.5 rounded">Requerido</span>
-                        </div>
-                        <div class="bg-stone-900/40 p-3 rounded-xl border border-stone-800 flex items-center justify-between">
-                            <span class="flex items-center gap-2"><i class="fa-solid fa-camera-retro text-eco-light"></i> Escáner 3D de alta resolución</span>
-                            <span class="text-[10px] bg-eco-dark/30 text-eco-light px-2 py-0.5 rounded">Requerido</span>
-                        </div>
-                        <div class="bg-stone-900/40 p-3 rounded-xl border border-stone-800 flex items-center justify-between">
-                            <span class="flex items-center gap-2"><i class="fa-solid fa-laptop-code text-eco-light"></i> Laptops para Diseño Gráfico / Modelado</span>
-                            <span class="text-[10px] bg-eco-dark/30 text-eco-light px-2 py-0.5 rounded">Requerido</span>
-                        </div>
-                    </div>
 
-                    <div class="p-4 rounded-xl glass-eco border border-eco/30">
-                        <h4 class="text-xs font-bold text-eco-light mb-1"><i class="fa-solid fa-certificate"></i> Certificados Entregados:</h4>
-                        <ul class="list-disc pl-4 space-y-1 text-[11px] text-stone-300">
-                            <li>Certificado oficial de Responsabilidad Social.</li>
-                            <li>Certificado de Aprovechamiento Homologado.</li>
-                            <li>Certificado de Responsabilidad Ambiental por material reciclado.</li>
-                        </ul>
+                    <div class="space-y-3.5 text-xs">
+                        <div class="bg-stone-900/50 p-3.5 rounded-xl border border-stone-800 flex items-center justify-between">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-award text-amber-500"></i> Certificado de Responsabilidad Social</span>
+                            <span class="text-[9px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded">Expedido</span>
+                        </div>
+                        <div class="bg-stone-900/50 p-3.5 rounded-xl border border-stone-800 flex items-center justify-between">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-recycle text-eco-light"></i> Certificado de Aprovechamiento Homologado</span>
+                            <span class="text-[9px] bg-eco/10 text-eco-light px-2 py-0.5 rounded">Expedido</span>
+                        </div>
+                        <div class="bg-stone-900/50 p-3.5 rounded-xl border border-stone-800 flex items-center justify-between">
+                            <span class="flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-sky-400"></i> Talleres Ambientales Certificados</span>
+                            <span class="text-[9px] bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded">Capacitación</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Live Impact Calculator Sandbox -->
-                <div class="lg:col-span-6 bg-gradient-to-b from-amber-950/20 to-stone-900/20 p-6 rounded-2xl border border-amber-500/20 shadow-2xl">
-                    <h3 class="font-serif text-xl text-amber-400 mb-2 flex items-center justify-between">
-                        <span>Calculador de Impacto</span>
-                        <span class="text-xs text-eco-light"><i class="fa-solid fa-calculator"></i> Simular</span>
-                    </h3>
-                    <p class="text-xs text-stone-400 mb-6">Mueve los controles para ver el impacto social de tu compra o patrocinio corporativo.</p>
-                    
-                    <!-- Slider 1: Honey Jars -->
-                    <div class="space-y-2 mb-5">
-                        <div class="flex justify-between text-xs font-bold text-stone-300">
-                            <span>Frascos de Miel Comprados:</span>
-                            <span class="text-amber-400" id="calc-honey-val">50 Frascos</span>
-                        </div>
-                        <input type="range" id="calc-honey" min="5" max="1000" value="50" step="5" class="w-full accent-amber-500 bg-stone-800" oninput="updateCalculator()">
+                <!-- Calculadora de Impacto Social -->
+                <div class="lg:col-span-6 bg-gradient-to-b from-amber-950/20 to-stone-900/20 p-6 rounded-2xl border border-amber-500/20 shadow-2xl space-y-6">
+                    <div>
+                        <h4 class="font-serif text-lg text-amber-400">Calculadora de Impacto Social</h4>
+                        <p class="text-[11px] text-stone-400">Mueve los parámetros para simular el impacto de tu donación de PET o compra institucional de Miel Ecopiensa.</p>
                     </div>
 
-                    <!-- Slider 2: Recycled Plastic tons -->
-                    <div class="space-y-2 mb-6">
+                    <!-- Slider de Miel Comprada -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-stone-300">
+                            <span>Frascos de Miel Comprados:</span>
+                            <span class="text-amber-400 font-extrabold" id="calc-honey-val">60 Frascos</span>
+                        </div>
+                        <input type="range" id="calc-honey" min="10" max="1500" value="60" step="10" class="w-full accent-amber-500 bg-stone-800" oninput="updateCalculator()">
+                    </div>
+
+                    <!-- Slider de Plástico PET Reciclado -->
+                    <div class="space-y-2">
                         <div class="flex justify-between text-xs font-bold text-stone-300">
                             <span>Plástico PET Reciclado (Toneladas):</span>
-                            <span class="text-eco-light" id="calc-pet-val">2 Toneladas</span>
+                            <span class="text-eco-light font-extrabold" id="calc-pet-val">2 Toneladas</span>
                         </div>
                         <input type="range" id="calc-pet" min="1" max="50" value="2" step="1" class="w-full accent-eco bg-stone-800" oninput="updateCalculator()">
                     </div>
 
-                    <!-- Results Metrics -->
+                    <!-- Resultados Financieros y Sociales -->
                     <div class="bg-black/40 rounded-xl p-4 border border-white/5 grid grid-cols-2 gap-4 text-center">
                         <div>
-                            <span class="text-[10px] uppercase text-stone-500 font-bold block">Horas de Impresión 3D</span>
-                            <span class="text-2xl font-extrabold text-amber-400" id="res-hours">150 hrs</span>
+                            <span class="text-[9px] uppercase text-stone-500 font-extrabold block">Horas de Impresión 3D</span>
+                            <span class="text-2xl font-extrabold text-amber-400" id="res-hours">220 hrs</span>
                         </div>
                         <div>
-                            <span class="text-[10px] uppercase text-stone-500 font-bold block">Prótesis Financiadas</span>
-                            <span class="text-2xl font-extrabold text-eco-light" id="res-prosthetics">1</span>
+                            <span class="text-[9px] uppercase text-stone-500 font-extrabold block">Prótesis Financiadas</span>
+                            <span class="text-2xl font-extrabold text-eco-light" id="res-prosthetics">2</span>
                         </div>
                     </div>
 
-                    <!-- CTA trigger -->
-                    <button onclick="scrollToSection('contact')" class="w-full mt-6 py-3 bg-gradient-to-r from-eco to-eco-dark text-white font-bold text-xs rounded-xl shadow hover:from-eco-light hover:to-eco transition">
-                        Presentar Intención de Alianza Corporativa
+                    <button onclick="scrollToSection('contact')" class="w-full py-3 bg-gradient-to-r from-eco to-eco-dark hover:from-eco-light hover:to-eco text-white font-extrabold text-xs rounded-xl shadow transition">
+                        Presentar Intención de Alianza Institucional
                     </button>
                 </div>
-
             </div>
 
 
-            <!-- Section D: Contact Form & Social channels -->
-            <div id="contact" class="pt-12 border-t border-stone-800 grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Bloque 5: Contacto Directo Integrado -->
+            <div id="contact" class="pt-12 border-t border-stone-900 grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div class="space-y-6">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-eco/10 text-eco-light border border-eco/20">
-                        <i class="fa-solid fa-headset"></i> Canal Directo
+                        <i class="fa-solid fa-headset"></i> Atención Directa
                     </span>
-                    <h3 class="text-3xl font-serif text-white">Canales de Contacto</h3>
+                    <h3 class="text-3xl font-serif text-white font-bold">Comunícate con la Fundación</h3>
                     <p class="text-stone-300 text-sm leading-relaxed">
-                        ¿Tienes dudas sobre los santuarios de abejas, deseas realizar una compra al por mayor o postular a un beneficiario para una prótesis gratuita de Ecobiónica? Contacta directamente al equipo de la fundación.
+                        ¿Tienes dudas sobre los santuarios de rescate de abejas, deseas programar una compra institucional o te gustaría postular a un beneficiario (persona o mascota) para el programa gratuito de prótesis? Contáctanos de inmediato.
                     </p>
 
-                    <!-- Contact credentials list -->
-                    <div class="space-y-4 text-sm text-stone-300">
+                    <!-- Tarjetas de canales físicos de contacto -->
+                    <div class="space-y-4 text-xs text-stone-300">
                         <div class="flex items-center space-x-3 bg-stone-900/50 p-4 rounded-xl border border-stone-800">
-                            <i class="fa-solid fa-users text-amber-400 text-lg"></i>
+                            <i class="fa-solid fa-envelope text-amber-400 text-lg"></i>
                             <div>
-                                <p class="text-xs text-stone-400">Representación Administrativa</p>
-                                <p class="font-bold text-white">Equipo Directivo de la Fundación</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3 bg-stone-900/50 p-4 rounded-xl border border-stone-800">
-                            <i class="fa-solid fa-envelope text-eco-light text-lg"></i>
-                            <div>
-                                <p class="text-xs text-stone-400">Correo Institucional</p>
-                                <a href="mailto:fundacionecopiensaevolution@gmail.com" class="font-bold text-white hover:text-eco-light underline">fundacionecopiensaevolution@gmail.com</a>
+                                <p class="text-[10px] text-stone-500">Correo Electrónico Oficial</p>
+                                <a href="mailto:fundacionecopiensaevolution@gmail.com" class="font-bold text-white hover:text-amber-400 underline">fundacionecopiensaevolution@gmail.com</a>
                             </div>
                         </div>
                         <div class="flex items-center space-x-3 bg-stone-900/50 p-4 rounded-xl border border-stone-800">
                             <i class="fa-brands fa-whatsapp text-emerald-500 text-lg"></i>
                             <div>
-                                <p class="text-xs text-stone-400">Teléfono / WhatsApp de la Fundación</p>
-                                <a href="tel:+573222070501" class="font-bold text-white hover:text-emerald-400">+57 322 207 0501</a>
+                                <p class="text-[10px] text-stone-500">WhatsApp / Teléfono</p>
+                                <a href="tel:+573222070501" class="font-bold text-white hover:text-emerald-400 underline">+57 322 207 0501</a>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 bg-stone-900/50 p-4 rounded-xl border border-stone-800">
+                            <i class="fa-solid fa-location-dot text-eco-light text-lg"></i>
+                            <div>
+                                <p class="text-[10px] text-stone-500">Presencia Nacional</p>
+                                <p class="font-bold text-white">Tuluá (Sede Fundadora), Bogotá, Medellín y más de Colombia</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Send Message interactive form panel -->
+                <!-- Formulario Dinámico -->
                 <div class="glass-premium p-6 rounded-2xl border border-amber-500/20 shadow-2xl space-y-4">
-                    <h4 class="font-serif text-xl text-amber-400">Envíanos un Mensaje</h4>
-                    <form onsubmit="handleContactSubmit(event)" class="space-y-3.5 text-xs">
+                    <h4 class="font-serif text-lg text-amber-400 font-bold">Envíanos un Mensaje Seguro</h4>
+                    <form onsubmit="handleContactSubmit(event)" class="space-y-4 text-xs">
                         <div>
-                            <label class="block text-stone-400 font-bold mb-1">Nombre Completo / Entidad:</label>
-                            <input type="text" id="contact-name" required class="w-full bg-stone-900 border border-stone-700 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
+                            <label class="block text-stone-400 font-semibold mb-1">Nombre Completo / Entidad:</label>
+                            <input type="text" id="contact-name" required class="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-stone-400 font-semibold mb-1">Correo Electrónico:</label>
+                                <input type="email" id="contact-email" required class="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-stone-400 font-semibold mb-1">Teléfono:</label>
+                                <input type="tel" id="contact-phone" placeholder="Ej: +57" class="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
+                            </div>
                         </div>
                         <div>
-                            <label class="block text-stone-400 font-bold mb-1">Correo Electrónico:</label>
-                            <input type="email" id="contact-email" required class="w-full bg-stone-900 border border-stone-700 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-stone-400 font-bold mb-1">Tipo de Interés:</label>
-                            <select id="contact-type" class="w-full bg-stone-900 border border-stone-700 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
-                                <option value="honey">Comprar Miel Premium</option>
-                                <option value="alliance">Alianza / Patrocinio de Prótesis</option>
-                                <option value="beneficiary">Postular a un Beneficiario de Prótesis</option>
-                                <option value="volunteer">Ser Voluntario en la Fundación</option>
+                            <label class="block text-stone-400 font-semibold mb-1">Tipo de Solicitud:</label>
+                            <select id="contact-type" class="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
+                                <option value="honey">Comprar Miel Premium (Conservación)</option>
+                                <option value="sponsor">Patrocinar Prótesis / Donar Equipamiento</option>
+                                <option value="beneficiary">Postular un Beneficiario de Prótesis Gratuita</option>
+                                <option value="recycle">Donar PET / Alianza de Aprovechamiento</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-stone-400 font-bold mb-1">Mensaje o Propuesta:</label>
-                            <textarea id="contact-message" required rows="3" class="w-full bg-stone-900 border border-stone-700 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none resize-none" placeholder="Cuéntanos cómo deseas participar..."></textarea>
+                            <label class="block text-stone-400 font-semibold mb-1">Mensaje o Propuesta:</label>
+                            <textarea id="contact-message" required rows="3" class="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none resize-none" placeholder="Cuéntanos los detalles de tu contacto..."></textarea>
                         </div>
                         <button type="submit" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-extrabold rounded-lg shadow hover:opacity-90 transition">
-                            Enviar Solicitud Segura
+                            Enviar Solicitud
                         </button>
                     </form>
                 </div>
@@ -564,56 +613,55 @@
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="w-full py-8 px-6 bg-black border-t border-stone-900 text-stone-500 text-xs">
+    <!-- PIE DE PÁGINA (FOOTER) -->
+    <footer class="w-full py-8 px-6 bg-black border-t border-stone-900 text-stone-500 text-xs mt-20">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex items-center space-x-3">
-                <img src="logo ecopiensa traspaewncia.png" alt="Logo" class="h-8 w-8 rounded-full bg-stone-900 p-0.5" onerror="this.src='https://placehold.co/100x100/047857/ffffff?text=E'">
+                <img src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png" alt="Logo" class="h-9 w-9 object-contain rounded-full bg-stone-900 p-0.5 border border-eco/30" onerror="this.src='logo ecopiensa traspaewncia.png'">
                 <div>
                     <p class="font-bold text-stone-300">Fundación Ecopiensa Evolution</p>
-                    <p class="text-[10px]">Tuluá, Valle del Cauca - Sedes en Bogotá, Medellín y más.</p>
+                    <p class="text-[10px] text-stone-500">Tuluá, Valle del Cauca - Cobertura en toda Colombia.</p>
                 </div>
             </div>
-            <div class="flex flex-wrap gap-4 items-center justify-center text-stone-400 text-xs">
+            <div class="flex flex-wrap gap-4 items-center justify-center text-stone-400 text-[11px]">
                 <a href="https://www.facebook.com/FundacionEecopiensaEvolution" target="_blank" class="hover:text-amber-400 transition flex items-center gap-1"><i class="fa-brands fa-facebook"></i> Facebook</a>
                 <span class="text-stone-800">|</span>
-                <a href="https://www.instagram.com/f.ecopiensa_evolution" target="_blank" class="hover:text-amber-400 transition flex items-center gap-1"><i class="fa-brands fa-instagram"></i> @f.ecopiensa_evolution</a>
+                <a href="https://www.instagram.com/f.ecopiensa_evolution" target="_blank" class="hover:text-amber-400 transition flex items-center gap-1"><i class="fa-brands fa-instagram"></i> Instagram</a>
                 <span class="text-stone-800">|</span>
                 <span class="text-[10px] text-stone-600">NIT 900998128-1</span>
             </div>
         </div>
-        <div class="max-w-6xl mx-auto text-center mt-6 pt-4 border-t border-stone-900/60 text-[10px] text-stone-600">
-            &copy; 2026 Fundación Ecopiensa Evolution. Todos los derechos reservados. Miel Ecopiensa Premium es un programa patentado.
+        <div class="max-w-6xl mx-auto text-center mt-6 pt-4 border-t border-stone-950 text-[10px] text-stone-600">
+            &copy; 2026 Fundación Ecopiensa Evolution. Todos los derechos reservados. Miel Ecopiensa Premium y el programa Ecobiónica son marcas registradas de la fundación.
         </div>
     </footer>
 
 
-    <!-- JAVASCRIPT & APP LOGIC -->
+    <!-- JAVASCRIPT & LOGICA DE LA APLICACIÓN -->
     <script>
-        // State variables
         let activeView = 'splash';
         let cameraStream = null;
         let arScore = 0;
 
-        // Three.js instances
+        // Instancias del motor Three.js para la abeja 3D interactiva
         let scene, camera, renderer, beeGroup, wingLeft, wingRight, particles;
         let animationFrameId = null;
         let clock = new THREE.Clock();
 
-        // Audio synthesizer (Tone.js)
+        // Sintetizador de audio (Tone.js) para feedback orgánico
         let synth;
 
-        // Toast notification helper
+        // Helper de Alertas Visuales (Toast notifications)
         function showToast(title, text, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `p-4 mb-3 rounded-xl border shadow-2xl transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-start gap-3 w-full ${
-                type === 'success' ? 'bg-eco-dark/90 border-eco text-white' : 'bg-amber-950/90 border-amber-500 text-amber-100'
+                type === 'success' ? 'bg-eco-dark/95 border-eco text-white' : 'bg-amber-950/95 border-amber-500 text-amber-100'
             }`;
             
             toast.innerHTML = `
-                <div class="text-lg mt-0.5">
-                    ${type === 'success' ? '<i class="fa-solid fa-circle-check text-eco-light"></i>' : '<i class="fa-solid fa-triangle-exclamation text-amber-400"></i>'}
+                <div class="text-base mt-0.5">
+                    ${type === 'success' ? '<i class="fa-solid fa-circle-check text-eco-light"></i>' : '<i class="fa-solid fa-circle-info text-amber-400"></i>'}
                 </div>
                 <div class="flex-grow">
                     <h4 class="font-bold text-xs">${title}</h4>
@@ -624,42 +672,37 @@
             
             container.appendChild(toast);
             
-            // Animate In
             setTimeout(() => {
                 toast.classList.remove('translate-y-2', 'opacity-0');
             }, 10);
 
-            // Animate Out
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
-            }, 5000);
+            }, 5500);
         }
 
-        // Navigation Manager
+        // Navegación Dinámica entre secciones
         function navigateTo(viewId) {
-            // Hide all views
             document.getElementById('view-splash').classList.add('hidden');
             document.getElementById('view-ar').classList.add('hidden');
             document.getElementById('view-product-info').classList.add('hidden');
 
-            // Show target view
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
             activeView = viewId;
 
-            // Header adjustments
+            // Ocultar barra de navegación estándar en modo AR para máxima inmersión móvil
             const header = document.querySelector('header');
             if (viewId === 'ar') {
-                header.classList.add('-translate-y-full'); // Hide header during full screen AR
+                header.classList.add('-translate-y-full');
             } else {
                 header.classList.remove('-translate-y-full');
             }
 
-            // Window scrolls
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Scroll to direct section anchor
+        // Desplazamiento preciso con anclaje
         function scrollToSection(id) {
             navigateTo('product-info');
             setTimeout(() => {
@@ -667,43 +710,41 @@
                 if (element) {
                     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-            }, 150);
+            }, 180);
         }
 
-        // Audio synthesis for click buzz interaction
         function playBuzzSound() {
             try {
                 if (!synth) {
+                    // Configurando sintetizador con oscilador de onda triangular para simular un zumbido real de abejas
                     synth = new Tone.PolySynth(Tone.Synth).toDestination();
                     synth.set({
                         oscillator: { type: "triangle" },
-                        envelope: { attack: 0.05, decay: 0.1, sustain: 0.3, release: 0.8 }
+                        envelope: { attack: 0.1, decay: 0.1, sustain: 0.5, release: 0.6 }
                     });
                 }
-                // Fast arpeggio frequency mimicking dynamic organic bee flying buzz
                 const now = Tone.now();
-                synth.triggerAttackRelease("E3", "16n", now);
-                synth.triggerAttackRelease("G3", "16n", now + 0.05);
-                synth.triggerAttackRelease("B3", "8n", now + 0.1);
+                // Secuencia armónica corta ascendente/descendente para imitar el vuelo rápido al huir
+                synth.triggerAttackRelease("D3", "32n", now);
+                synth.triggerAttackRelease("E3", "32n", now + 0.04);
+                synth.triggerAttackRelease("F#3", "16n", now + 0.08);
+                synth.triggerAttackRelease("D3", "8n", now + 0.12);
             } catch (error) {
-                console.log("Audio not allowed yet or error:", error);
+                console.log("Audio temporalmente inactivo: ", error);
             }
         }
 
-
-        // Start Simulated / Real camera AR Experience
         async function startAR() {
             navigateTo('ar');
-            showToast("Iniciando Realidad Aumentada", "Estamos preparando la cámara y el modelo interactivo de la abeja 3D.", "info");
+            showToast("Iniciando Realidad Aumentada", "Preparando la cámara del dispositivo y el motor gráfico interactivo 3D.", "info");
 
             const video = document.getElementById('ar-webcam');
             const fallbackBg = document.getElementById('ar-fallback-bg');
 
-            // Reset score
             arScore = 0;
             document.getElementById('ar-score').innerText = arScore;
 
-            // Attempt to fetch front/back camera feed
+            // Intentar solicitar la cámara trasera del dispositivo móvil
             try {
                 const constraints = {
                     video: { facingMode: "environment" },
@@ -712,31 +753,29 @@
                 cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = cameraStream;
                 video.classList.remove('hidden');
-                fallbackBg.classList.add('opacity-40'); // Keep background dark/ambient grid but show camera overlay
-                showToast("Cámara Iniciada", "Explora tu entorno, la abeja se materializará flotando frente a ti.", "success");
+                fallbackBg.classList.add('opacity-45'); // Fondo mixto para mantener contraste
+                showToast("Cámara Activa", "La abeja 3D se ha materializado sobre tu entorno físico. ¡Disfruta la experiencia!", "success");
             } catch (err) {
-                console.warn("Camera stream refused or unavailable: ", err);
+                console.warn("Acceso a cámara rechazado o no disponible: ", err);
                 video.classList.add('hidden');
-                fallbackBg.classList.remove('opacity-40'); // Full digital environment fallback
-                showToast("Modo Digital Activado", "No pudimos acceder a tu cámara, pero puedes interactuar con la abeja 3D en el entorno virtual.", "info");
+                fallbackBg.classList.remove('opacity-45'); // Carga fondo digital inmersivo por defecto
+                showToast("Modo Digital Iniciado", "La cámara está inactiva. Hemos cargado el santuario digital interactivo.", "info");
             }
 
-            // Initialize Tone audio context
+            // Iniciar Audio Context
             await Tone.start();
 
-            // Setup Three.js interactive canvas
+            // Renderizar la escena de Three.js
             initThreeJS();
         }
 
-        // Terminate camera stream and clean WebGL references
+        // Detener cámara y limpiar instancias 3D de WebGL
         function stopAR() {
-            // Stop camera hardware stream
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
                 cameraStream = null;
             }
 
-            // Clean up Three.js animation and DOM references
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
                 animationFrameId = null;
@@ -750,221 +789,206 @@
             navigateTo('splash');
         }
 
-
-        // THREE.JS Engine setup
         function initThreeJS() {
             const container = document.getElementById('canvas-container');
-            container.innerHTML = ''; // clear previous elements
+            container.innerHTML = ''; 
 
             const width = container.clientWidth || window.innerWidth;
             const height = container.clientHeight || window.innerHeight;
 
-            // 1. Scene setup
+            // Escena
             scene = new THREE.Scene();
 
-            // 2. Camera setup
+            // Cámara
             camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-            camera.position.set(0, 0, 5);
+            camera.position.set(0, 0, 4.5);
 
-            // 3. Renderer setup
+            // Renderizador
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(width, height);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
 
-            // 4. Lighting setup
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            // Iluminación ambiental y puntual dorada para la colmena
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
 
-            const pointLight = new THREE.PointLight(0xf59e0b, 2.5, 50); // Premium golden amber glow
-            pointLight.position.set(2, 5, 5);
-            scene.add(pointLight);
+            const amberLight = new THREE.PointLight(0xf59e0b, 3, 30);
+            amberLight.position.set(2, 4, 3);
+            scene.add(amberLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight.position.set(-2, 3, 2);
-            scene.add(directionalLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(-2, 3, 2);
+            scene.add(dirLight);
 
-            // 5. Procedural 3D Bee building (combining spheres, striped materials, translucent wings)
+            // Creando la abeja procedural en 3D
             beeGroup = new THREE.Group();
 
-            // BEE THORAX (Middle segment)
+            // Tórax (Esfera metálica dorada)
             const thoraxGeo = new THREE.SphereGeometry(0.5, 32, 32);
             const thoraxMat = new THREE.MeshStandardMaterial({
-                color: 0xd97706, // Premium golden metallic
-                metalness: 0.8,
-                roughness: 0.2
+                color: 0xd97706,
+                metalness: 0.85,
+                roughness: 0.15
             });
             const thorax = new THREE.Mesh(thoraxGeo, thoraxMat);
             beeGroup.add(thorax);
 
-            // BEE HEAD
+            // Cabeza (Esfera oscura)
             const headGeo = new THREE.SphereGeometry(0.35, 32, 32);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.5 });
+            const headMat = new THREE.MeshStandardMaterial({ color: 0x1a1510, roughness: 0.4 });
             const head = new THREE.Mesh(headGeo, headMat);
-            head.position.set(0, 0.1, 0.6);
+            head.position.set(0, 0.15, 0.55);
             beeGroup.add(head);
 
-            // BLUE EYES (Matches the colorful label logo detail!)
+            // Ojos Azules Brillantes (Inspirados en la ilustración original de la abeja de la miel)
             const eyeGeo = new THREE.SphereGeometry(0.12, 16, 16);
             const eyeMat = new THREE.MeshStandardMaterial({
-                color: 0x3b82f6,
-                emissive: 0x1d4ed8,
-                emissiveIntensity: 0.6,
+                color: 0x2563eb,
+                emissive: 0x1e40af,
+                emissiveIntensity: 0.7,
                 roughness: 0.1
             });
             
             const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-            leftEye.position.set(-0.18, 0.2, 0.8);
+            leftEye.position.set(-0.18, 0.22, 0.75);
             const rightEye = leftEye.clone();
             rightEye.position.x = 0.18;
             beeGroup.add(leftEye);
             beeGroup.add(rightEye);
 
-            // BEE ABDOMEN (Back striped segment)
-            const abdomenGeo = new THREE.CylinderGeometry(0.3, 0.45, 1.2, 32);
-            abdomenGeo.rotateX(Math.PI / 2); // align horizontally
+            // Abdomen de rayas alternas (Canvas Texture procedural)
+            const abdomenGeo = new THREE.CylinderGeometry(0.32, 0.45, 1.3, 32);
+            abdomenGeo.rotateX(Math.PI / 2); // Alinar de forma horizontal
             
-            // Procedural Canvas Stripe texture
-            const canvas = document.createElement('canvas');
-            canvas.width = 128;
-            canvas.height = 128;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#f59e0b'; // Gold yellow
-            ctx.fillRect(0, 0, 128, 128);
-            ctx.fillStyle = '#1c1917'; // Charcoal black
-            ctx.fillRect(0, 30, 128, 20);
-            ctx.fillRect(0, 80, 128, 20);
+            const stripeCanvas = document.createElement('canvas');
+            stripeCanvas.width = 128;
+            stripeCanvas.height = 128;
+            const sCtx = stripeCanvas.getContext('2d');
+            sCtx.fillStyle = '#f59e0b'; // Amarillo dorado
+            sCtx.fillRect(0, 0, 128, 128);
+            sCtx.fillStyle = '#1c1917'; // Negro carbón
+            sCtx.fillRect(0, 25, 128, 18);
+            sCtx.fillRect(0, 65, 128, 18);
+            sCtx.fillRect(0, 105, 128, 18);
             
-            const stripeTexture = new THREE.CanvasTexture(canvas);
+            const stripeTexture = new THREE.CanvasTexture(stripeCanvas);
             const abdomenMat = new THREE.MeshStandardMaterial({
                 map: stripeTexture,
-                roughness: 0.3,
-                metalness: 0.4
+                roughness: 0.25,
+                metalness: 0.5
             });
             const abdomen = new THREE.Mesh(abdomenGeo, abdomenMat);
-            abdomen.position.set(0, -0.15, -0.8);
+            abdomen.position.set(0, -0.1, -0.8);
             beeGroup.add(abdomen);
 
-            // BEE WINGS (Translucent flat shapes)
-            const wingGeo = new THREE.BoxGeometry(0.8, 0.02, 0.3);
+            // Alas Translúcidas con efecto de microtextura
+            const wingGeo = new THREE.BoxGeometry(0.85, 0.015, 0.32);
             const wingMat = new THREE.MeshStandardMaterial({
                 color: 0x93c5fd,
                 transparent: true,
-                opacity: 0.6,
+                opacity: 0.55,
                 roughness: 0.1,
-                metalness: 0.9
+                metalness: 0.8
             });
 
             wingLeft = new THREE.Mesh(wingGeo, wingMat);
-            wingLeft.position.set(-0.7, 0.4, 0);
-            wingLeft.rotation.z = -0.2;
+            wingLeft.position.set(-0.7, 0.38, -0.1);
+            wingLeft.rotation.z = -0.22;
             beeGroup.add(wingLeft);
 
             wingRight = wingLeft.clone();
             wingRight.position.x = 0.7;
-            wingRight.rotation.z = 0.2;
+            wingRight.rotation.z = 0.22;
             beeGroup.add(wingRight);
 
-            // Initial positioning inside the view
-            beeGroup.position.set(0, 0, 1.5);
+            // Posición inicial dentro del rango visual
+            beeGroup.position.set(0, 0, 1.2);
             scene.add(beeGroup);
 
-
-            // 6. Natural pollen particle dust floating around
+            // Partículas flotantes de polen brillante
             const particleGeo = new THREE.BufferGeometry();
-            const particleCount = 60;
+            const particleCount = 75;
             const posArray = new Float32Array(particleCount * 3);
 
             for (let i = 0; i < particleCount * 3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 10;
+                posArray[i] = (Math.random() - 0.5) * 8;
             }
 
             particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
             const particleMat = new THREE.PointsMaterial({
-                size: 0.08,
-                color: 0xf59e0b, // glowing yellow pollen
+                size: 0.07,
+                color: 0xf59e0b,
                 transparent: true,
-                opacity: 0.8
+                opacity: 0.75
             });
 
             particles = new THREE.Points(particleGeo, particleMat);
             scene.add(particles);
 
-
-            // 7. Interactive touch/tap Raycasting setup
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
 
-            function onTouch(event) {
-                // Handle either touch event (mobile) or mouse click (desktop)
-                let clientX = 0;
-                let clientY = 0;
+            function handleTouchInteraction(event) {
+                let posX = 0;
+                let posY = 0;
 
-                if (event.touches) {
-                    clientX = event.touches[0].clientX;
-                    clientY = event.touches[0].clientY;
+                if (event.touches && event.touches.length > 0) {
+                    posX = event.touches[0].clientX;
+                    posY = event.touches[0].clientY;
                 } else {
-                    clientX = event.clientX;
-                    clientY = event.clientY;
+                    posX = event.clientX;
+                    posY = event.clientY;
                 }
 
-                // Convert coordinate space to standard normalized device coords (-1 to +1)
-                mouse.x = (clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+                // Normalización de coordenadas para Three.js
+                mouse.x = (posX / window.innerWidth) * 2 - 1;
+                mouse.y = -(posY / window.innerHeight) * 2 + 1;
 
                 raycaster.setFromCamera(mouse, camera);
-
-                // Check intersection with all geometries inside beeGroup
                 const intersects = raycaster.intersectObjects(beeGroup.children, true);
 
                 if (intersects.length > 0) {
-                    onBeeClicked();
+                    onBeeCaptured();
                 }
             }
 
-            container.addEventListener('click', onTouch);
-            container.addEventListener('touchstart', onTouch);
+            container.addEventListener('click', handleTouchInteraction);
+            container.addEventListener('touchstart', handleTouchInteraction);
 
-
-            // 8. Start frame rendering loop
+            // Iniciar ciclo de renderizado
             animateThreeJS();
 
-            // Responsive scale monitor
+            // Monitorear redimensionado de pantalla
             window.addEventListener('resize', onWindowResize);
         }
 
-
-        // Animated Frame Loop
         function animateThreeJS() {
             animationFrameId = requestAnimationFrame(animateThreeJS);
 
             const elapsedTime = clock.getElapsedTime();
 
             if (beeGroup) {
-                // A. Flutter wings rapidly (simulate active flight cycle)
-                const flapSpeed = 40;
-                wingLeft.rotation.z = -Math.abs(Math.sin(elapsedTime * flapSpeed)) * 0.8 - 0.1;
-                wingRight.rotation.z = Math.abs(Math.sin(elapsedTime * flapSpeed)) * 0.8 + 0.1;
+                // Aleteo ultrarrápido dinámico
+                const flapSpeed = 45;
+                wingLeft.rotation.z = -Math.abs(Math.sin(elapsedTime * flapSpeed)) * 0.75 - 0.15;
+                wingRight.rotation.z = Math.abs(Math.sin(elapsedTime * flapSpeed)) * 0.75 + 0.15;
 
-                // B. Hover floating loop (Gentle sinusoidal movement)
-                beeGroup.position.y = Math.sin(elapsedTime * 2.5) * 0.25;
-                beeGroup.position.x = Math.cos(elapsedTime * 1.5) * 0.15;
-                
-                // Rotational wobble for life-like presence
-                beeGroup.rotation.z = Math.sin(elapsedTime * 2) * 0.1;
-                beeGroup.rotation.y = Math.cos(elapsedTime * 1.5) * 0.1;
+                // Balanceo sutil para simular flotabilidad natural en el viento
+                beeGroup.position.y = Math.sin(elapsedTime * 2.8) * 0.2;
+                beeGroup.position.x = Math.cos(elapsedTime * 1.8) * 0.12;
+                beeGroup.rotation.z = Math.sin(elapsedTime * 2.2) * 0.08;
+                beeGroup.rotation.y = Math.cos(elapsedTime * 1.4) * 0.08;
             }
 
-            // Dynamic rotation for dust particles
             if (particles) {
-                particles.rotation.y = elapsedTime * 0.05;
-                particles.rotation.x = elapsedTime * 0.03;
+                particles.rotation.y = elapsedTime * 0.04;
+                particles.rotation.x = elapsedTime * 0.02;
             }
 
             renderer.render(scene, camera);
         }
 
-        // Adjust perspective dynamically if viewport shifts
         function onWindowResize() {
             if (!camera || !renderer) return;
             const container = document.getElementById('canvas-container');
@@ -977,75 +1001,67 @@
             renderer.setSize(width, height);
         }
 
-
-        // Bee Tap interaction action
-        function onBeeClicked() {
-            // Increase UI score metrics
+        function onBeeCaptured() {
             arScore++;
             document.getElementById('ar-score').innerText = arScore;
 
-            // Synthesis sound trigger
+            // Reproducir feedback acústico
             playBuzzSound();
 
-            // Flash visual effect overlay
-            const scorePanel = document.getElementById('ar-score').parentElement;
-            scorePanel.classList.add('scale-125', 'text-amber-300');
+            // Animación visual de impacto en marcador
+            const scoreEl = document.getElementById('ar-score').parentElement;
+            scoreEl.classList.add('scale-125', 'text-amber-400');
             setTimeout(() => {
-                scorePanel.classList.remove('scale-125', 'text-amber-300');
-            }, 250);
+                scoreEl.classList.remove('scale-125', 'text-amber-400');
+            }, 200);
 
-            // Teleport bee dynamically away inside viewport ranges
-            const targetX = (Math.random() - 0.5) * 2.4;
-            const targetY = (Math.random() - 0.5) * 1.8;
-            const targetZ = 1 + (Math.random() * 1.5); // bring closer or further away
+            // Posiciones aleatorias de reubicación dentro del rango seguro de la cámara
+            const targetX = (Math.random() - 0.5) * 2.2;
+            const targetY = (Math.random() - 0.5) * 1.6;
+            const targetZ = 0.8 + (Math.random() * 1.4); 
 
-            // Smoothly relocate position using simple linear interpolation steps
-            let t = 0;
-            const currentX = beeGroup.position.x;
-            const currentY = beeGroup.position.y;
-            const currentZ = beeGroup.position.z;
+            // Interpolar matemáticamente el movimiento hacia la nueva posición
+            let step = 0;
+            const initX = beeGroup.position.x;
+            const initY = beeGroup.position.y;
+            const initZ = beeGroup.position.z;
 
-            function interpolateRelocation() {
-                t += 0.1;
-                if (t <= 1) {
-                    beeGroup.position.x = currentX + (targetX - currentX) * t;
-                    beeGroup.position.y = currentY + (targetY - currentY) * t;
-                    beeGroup.position.z = currentZ + (targetZ - currentZ) * t;
-                    requestAnimationFrame(interpolateRelocation);
+            function smoothMove() {
+                step += 0.15;
+                if (step <= 1) {
+                    beeGroup.position.x = initX + (targetX - initX) * step;
+                    beeGroup.position.y = initY + (targetY - initY) * step;
+                    beeGroup.position.z = initZ + (targetZ - initZ) * step;
+                    requestAnimationFrame(smoothMove);
                 }
             }
-            interpolateRelocation();
+            smoothMove();
 
-            // Custom celebratory notification toasts on intervals
+            // Mensaje motivador interactivo por metas de toques
             if (arScore === 1) {
-                showToast("¡Buen intento!", "La abeja voló para evitar ser atrapada. ¡Prueba de nuevo!", "info");
-            } else if (arScore === 3) {
-                showToast("Polinización Exitosa", "¡Excelente coordinación! Sigue jugando o avanza al menú de nuestro producto.", "success");
+                showToast("¡Vuela rápido!", "La abeja detectó tu toque y se trasladó. ¡Sigue intentándolo!", "info");
+            } else if (arScore === 4) {
+                showToast("¡Buen ritmo!", "Has interactuado eficientemente. Recuerda que puedes continuar con el producto cuando gustes.", "success");
             }
         }
 
-
-        // Dynamic Live Impact Calculator calculations
         function updateCalculator() {
-            const honeyVal = parseInt(document.getElementById('calc-honey').value);
-            const petVal = parseInt(document.getElementById('calc-pet').value);
+            const honeyCount = parseInt(document.getElementById('calc-honey').value);
+            const petTons = parseInt(document.getElementById('calc-pet').value);
 
-            // Output visual updates
-            document.getElementById('calc-honey-val').innerText = `${honeyVal} Frascos`;
-            document.getElementById('calc-pet-val').innerText = `${petVal} ${petVal === 1 ? 'Tonelada' : 'Toneladas'}`;
+            document.getElementById('calc-honey-val').innerText = `${honeyCount} ${honeyCount === 1 ? 'Frasco' : 'Frascos'}`;
+            document.getElementById('calc-pet-val').innerText = `${petTons} ${petTons === 1 ? 'Tonelada' : 'Toneladas'}`;
 
-            // Computational metrics formula:
-            // Every honey jar helps fund bionic print time. Let's say:
-            // 5 jars fund 15 hours of 3D printing.
-            // 2 Tons of PET + 50 honey jars can produce roughly 1 high fidelity functional prosthetic!
-            const printingHours = Math.round((honeyVal * 3) + (petVal * 20));
-            const prostheticsCommitted = Math.max(1, Math.floor(printingHours / 100));
+            // Ecuación de impacto social (Cada frasco de miel y tonelada de PET financian horas de modelado e impresión)
+            const estimatedHours = Math.round((honeyCount * 2.5) + (petTons * 35));
+            // Estimado de prótesis terminadas y ensambladas (aproximadamente una prótesis cada 110 horas de manufactura/estudio)
+            const prostheticsFunded = Math.max(1, Math.floor(estimatedHours / 110));
 
-            document.getElementById('res-hours').innerText = `${printingHours} hrs`;
-            document.getElementById('res-prosthetics').innerText = `${prostheticsCommitted}`;
+            document.getElementById('res-hours').innerText = `${estimatedHours} hrs`;
+            document.getElementById('res-prosthetics').innerText = `${prostheticsFunded}`;
         }
 
-        // Contact email submission trigger
+        // Procesamiento del formulario de contacto
         function handleContactSubmit(event) {
             event.preventDefault();
             
@@ -1053,22 +1069,21 @@
             const email = document.getElementById('contact-email').value;
             const type = document.getElementById('contact-type').value;
 
-            let typeStr = "Compra de Miel";
-            if (type === "alliance") typeStr = "Alianza Corporativa / Patrocinio";
-            if (type === "beneficiary") typeStr = "Postulación de Beneficiario";
-            if (type === "volunteer") typeStr = "Voluntariado";
+            let typeText = "Comprar Miel Premium";
+            if (type === "sponsor") typeText = "Patrocinio de Prótesis";
+            if (type === "beneficiary") typeText = "Postulación de Beneficiario";
+            if (type === "recycle") typeText = "Donación de Reciclaje / Alianza";
 
             showToast(
-                "¡Mensaje Enviado con Éxito!",
-                `Hola ${name}, hemos recibido tu interés en "${typeStr}". Nos contactaremos a ${email} pronto.`,
+                "¡Mensaje Recibido!",
+                `Gracias por contactarnos, ${name}. Procesaremos tu solicitud sobre "${typeText}" y te contactaremos en ${email}.`,
                 "success"
             );
 
-            // Reset form fields
             event.target.reset();
         }
 
-        // Initialize calculations defaults on boot
+        // Carga inicial y simulación
         window.onload = function () {
             updateCalculator();
         };
