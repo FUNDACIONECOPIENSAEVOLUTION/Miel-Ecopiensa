@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Miel Ecopiensa - Realidad Aumentada & Impacto Ecobiónica</title>
     
-    <!-- Tailwind CSS para el diseño responsivo -->
+    <!-- Tailwind CSS for premium, responsive layouts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -35,11 +35,10 @@
         }
     </script>
     
-    <!-- Google Fonts & FontAwesome Icons para el diseño premium -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght=0,600;0,700;1,500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Motores Interactivos: Three.js (3D) y Tone.js (Sintetizador de audio) -->
+    <!-- Interactivity Modules: Three.js (3D Graphics Engine) and Tone.js (Synthesized sound engine) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
@@ -53,41 +52,26 @@
         .font-serif {
             font-family: 'Playfair Display', serif;
         }
-        /* Cristalografía dorada premium */
+        /* Premium Frosted Glassmorphism for Containers */
         .glass-premium {
             background: rgba(18, 14, 10, 0.85);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(245, 158, 11, 0.18);
         }
-        /* Cristalografía verde ecológica */
         .glass-eco {
             background: rgba(6, 15, 12, 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(16, 185, 129, 0.22);
         }
-        /* Animaciones fluidas para microinteracciones */
-        @keyframes pulse-slow {
-            0%, 100% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.03); opacity: 1; }
-        }
-        .animate-pulse-slow {
-            animation: pulse-slow 4s infinite ease-in-out;
-        }
+        /* Custom Keyframe Animations for Natural Floating Effects */
         @keyframes float-bee {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(1deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
         }
         .animate-float {
             animation: float-bee 6s infinite ease-in-out;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
         }
     </style>
 </head>
@@ -95,10 +79,15 @@
 
     <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-md pointer-events-none"></div>
 
+    <!-- MAIN APP NAVIGATION HEADER -->
     <header class="w-full py-4 px-6 glass-premium border-b border-amber-500/10 fixed top-0 left-0 z-40 transition-all duration-300">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('splash')">
-                <img id="header-logo" src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png" alt="Logo Ecopiensa" class="h-10 w-10 object-contain rounded-full bg-black/40 p-1 border border-eco" onerror="this.src='logo ecopiensa traspaewncia.png'; this.onerror=function(){this.src='https://placehold.co/100x100/047857/ffffff?text=Ecopiensa'}">
+                <img id="header-logo" 
+                     src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png" 
+                     alt="Logo Ecopiensa" 
+                     class="h-10 w-10 object-contain rounded-full bg-black/40 p-1 border border-eco" 
+                     onerror="handleLogoError(this)">
                 <div>
                     <h1 class="text-sm font-bold text-amber-400 tracking-wider">ECOPIENSA</h1>
                     <p class="text-[9px] text-eco-light tracking-widest uppercase">Evolution</p>
@@ -126,19 +115,22 @@
         <section id="view-splash" class="min-h-[85vh] flex flex-col items-center justify-center px-4 py-8 max-w-5xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
                 
-                <!-- Presentación de la etiqueta física del producto -->
+                <!-- Presentación de la etiqueta física del producto - FIXED FOR ZERO CROPPING -->
                 <div class="lg:col-span-5 flex flex-col items-center text-center">
                     <div class="relative group max-w-sm w-full animate-float">
-                        <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-500 to-eco rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                        <div class="relative bg-black rounded-2xl overflow-hidden border border-amber-500/30 shadow-2xl">
-                            <!-- Imagen de la etiqueta -->
-                            <img id="label-image" src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/5.png" alt="Etiqueta Miel Ecopiensa" class="w-full h-auto object-cover max-h-[480px]" onerror="this.src='5.jpg'; this.onerror=function(){this.src='https://placehold.co/400x500/d97706/ffffff?text=Miel+Ecopiensa'}">
+                        <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-500 to-eco rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+                        <!-- We use padding and clear containment (w-full h-auto object-contain) to prevent any top cropping -->
+                        <div class="relative bg-stone-950 p-3 rounded-2xl border border-amber-500/30 shadow-2xl flex items-center justify-center overflow-hidden">
+                            <img id="label-image" 
+                                 src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/5.png" 
+                                 alt="Etiqueta Miel Ecopiensa" 
+                                 class="w-full h-auto object-contain max-h-[500px] rounded-xl transition duration-500 group-hover:scale-[1.02]" 
+                                 onerror="this.src='5.png';">
                         </div>
                     </div>
                     <p class="text-xs text-amber-400/70 mt-4 italic"><i class="fa-solid fa-qrcode mr-1.5"></i> Escaneado exitosamente del tarro de miel</p>
                 </div>
 
-                <!-- Copys promocionales y botones de navegación primaria -->
                 <div class="lg:col-span-7 flex flex-col justify-center space-y-6 text-center lg:text-left px-2">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 self-center lg:self-start">
                         <i class="fa-solid fa-leaf text-eco"></i> Proyecto Apícola y Social de la Fundación
@@ -188,10 +180,10 @@
         <!-- VISTA 2: Pantalla de Realidad Aumentada (Simulador y Cámara real sobrepuesta) -->
         <section id="view-ar" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between">
             
-            <!-- Flujo de la cámara Web en tiempo real -->
+            <!-- Real-time viewport camera stream -->
             <video id="ar-webcam" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover z-0 opacity-80" style="transform: scaleX(-1);"></video>
             
-            <!-- Fondo alterno digital por si la cámara no es concedida o el navegador carece de soporte -->
+            <!-- Fallback background when camera permissions are disabled -->
             <div id="ar-fallback-bg" class="absolute inset-0 z-0 bg-gradient-to-b from-amber-950 via-stone-900 to-black flex items-center justify-center">
                 <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:24px_24px]"></div>
                 <div class="text-center p-6 max-w-sm z-10">
@@ -203,13 +195,17 @@
                 </div>
             </div>
 
-            <!-- Capa sobrepuesta para el motor Three.js -->
+            <!-- Interactivity Layer for Three.js WebGL rendering -->
             <div id="canvas-container" class="absolute inset-0 z-10 cursor-pointer"></div>
 
-            <!-- Interfaz superior de AR -->
+            <!-- Header HUD inside AR Mode -->
             <div class="relative z-20 w-full p-4 glass-premium flex items-center justify-between border-b border-white/5">
                 <div class="flex items-center space-x-3">
-                    <img src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png" alt="Logo" class="h-8 w-8 rounded-full bg-black/50 border border-eco" onerror="this.src='logo ecopiensa traspaewncia.png'; this.onerror=function(){this.src='https://placehold.co/100x100/047857/ffffff?text=E'}">
+                    <img id="ar-header-logo"
+                         src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png" 
+                         alt="Logo" 
+                         class="h-8 w-8 rounded-full bg-black/50 border border-eco" 
+                         onerror="handleLogoError(this)">
                     <div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
@@ -223,26 +219,26 @@
                 </button>
             </div>
 
-            <!-- Interfaz inferior de juego y avance -->
-            <div class="relative z-20 w-full p-4 flex flex-col items-center space-y-4 pb-8">
+            <!-- Navigation HUD inside AR Mode -->
+            <div class="relative z-20 w-full p-4 flex flex-col items-center space-y-4 pb-8 pointer-events-none">
                 
-                <!-- Indicador de toque -->
-                <div class="glass-premium border border-amber-400/40 px-5 py-3 rounded-2xl max-w-sm text-center shadow-2xl animate-bounce">
+                <!-- Dynamic touch target feedback block -->
+                <div class="glass-premium border border-amber-400/40 px-5 py-3 rounded-2xl max-w-sm text-center shadow-2xl animate-bounce pointer-events-auto">
                     <p class="text-xs text-amber-300 font-bold flex items-center justify-center gap-1.5">
-                        <span>🐝</span> ¡Intenta tocar a la abeja en la pantalla!
+                        <span>🐝</span> ¡Toca a la abeja tricolor!
                     </p>
-                    <p class="text-[10px] text-stone-300 mt-1">Zumbará de forma interactiva y volará rápidamente a otra posición al ser tocada.</p>
+                    <p class="text-[10px] text-stone-300 mt-1">Zumba con orgullo colombiano (Amarillo, Azul y Rojo) y escapará volando velozmente por todo el espacio al tocarla.</p>
                 </div>
 
-                <!-- Registro estadístico de capturas -->
-                <div class="flex items-center space-x-4 bg-black/90 backdrop-blur border border-white/10 px-5 py-2 rounded-full text-xs">
-                    <span class="text-stone-300"><i class="fa-solid fa-hand-pointer text-amber-400 mr-1.5"></i> Toques: <strong id="ar-score" class="text-amber-400 text-sm">0</strong></span>
+                <!-- Live capture metrics hud -->
+                <div class="flex items-center space-x-4 bg-black/90 backdrop-blur border border-white/10 px-5 py-2 rounded-full text-xs pointer-events-auto">
+                    <span class="text-stone-300"><i class="fa-solid fa-hand-pointer text-amber-400 mr-1.5"></i> Capturas: <strong id="ar-score" class="text-amber-400 text-sm">0</strong></span>
                     <span class="text-stone-600">|</span>
                     <span class="text-eco-light"><i class="fa-solid fa-shield-heart mr-1.5"></i> Proyecto Social Activo</span>
                 </div>
 
-                <!-- Botón de continuación hacia detalles del producto -->
-                <button onclick="stopAR(); navigateTo('product-info')" id="ar-continue-btn" class="w-full max-w-sm py-3.5 bg-gradient-to-r from-amber-500 via-yellow-500 to-eco text-black font-extrabold text-sm rounded-full shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2">
+                <!-- Navigation bridge button -->
+                <button onclick="stopAR(); navigateTo('product-info')" id="ar-continue-btn" class="w-full max-w-sm py-3.5 bg-gradient-to-r from-amber-500 via-yellow-500 to-eco text-black font-extrabold text-sm rounded-full shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 pointer-events-auto">
                     <span>Ver Nuestro Producto e Impacto</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
@@ -268,7 +264,7 @@
                     
                     <div class="p-4 rounded-xl glass-premium border-l-4 border-amber-500 text-xs text-stone-300 leading-relaxed">
                         <p class="font-bold text-amber-300 mb-1">🐝 Traslado de Colmenas Metropolitanas</p>
-                        Abejas en riesgo inminente dentro de la congestionada ciudad de Bogotá son cuidadosamente rescatadas y transportadas por personal especializado a áreas de reserva de la sabana y bosques andinos, donde pueden multiplicarse, polinizar especies nativas y generar miel libre de los agroquímicos industriales y polución citadina.
+                        Abejas en riesgo inminente dentro de la ciudad de Bogotá son cuidadosamente rescatadas y transportadas por personal especializado a reservas andinas de la sabana, donde polinizan especies nativas y generan miel 100% pura, libre de agroquímicos y polución citadina.
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 text-xs">
@@ -306,7 +302,11 @@
                             </li>
                         </ul>
                         <div class="mt-6 border-t border-stone-800 pt-4 flex items-center justify-between">
-                            <img src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png" alt="Logo Ecopiensa" class="h-9 w-9 object-contain rounded-full bg-black border border-eco" onerror="this.src='logo ecopiensa traspaewncia.png'">
+                            <img id="card-logo-badge"
+                                 src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png" 
+                                 alt="Logo Ecopiensa" 
+                                 class="h-9 w-9 object-contain rounded-full bg-black border border-eco" 
+                                 onerror="handleLogoError(this)">
                             <span class="text-[10px] text-stone-500">Miel Ecopiensa Premium</span>
                         </div>
                     </div>
@@ -316,16 +316,22 @@
 
             <!-- Bloque 2: Proyecto ECOBIÓNICA (Estructura oficial del documento docx) -->
             <div id="ecobionica" class="pt-12 border-t border-stone-900">
-                <div class="text-center max-w-3xl mx-auto space-y-4 mb-16">
+                <div class="text-center max-w-3xl mx-auto space-y-6 mb-16">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-eco/10 text-eco-light border border-eco/20">
                         <i class="fa-solid fa-hand-holding-heart"></i> Compromiso de Ingeniería Social
                     </span>
-                    <h2 class="text-3xl sm:text-5xl font-serif text-white">
-                        Proyecto ECOBIÓNICA
-                    </h2>
-                    <p class="text-stone-300 text-sm sm:text-base italic">
-                        “Damos Movilidad A Tu Vida, Con La Recuperación De Materiales Reciclables.”
-                    </p>
+                    
+                    <!-- Official Ecobiónica Program Logo Header - Beautifully Framed -->
+                    <div class="flex flex-col items-center justify-center space-y-3">
+                        <img id="logo-ecobionica-main" 
+                             src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecobionica%20con%20trasparencia.png" 
+                             alt="Logo Ecobiónica" 
+                             class="max-w-md w-11/12 h-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                             onerror="handleEcobionicaError(this)">
+                        <p class="text-stone-300 text-sm sm:text-base italic max-w-xl">
+                            “Damos Movilidad A Tu Vida, Con La Recuperación De Materiales Reciclables.”
+                        </p>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
@@ -340,7 +346,7 @@
                                 El programa **ECOBIÓNICA** es liderado por la <strong>Fundación Ecopiensa Evolution</strong> (NIT 900998128-1). Nace a partir de brigadas de salud conjuntas con el Ejército Nacional y la Policía Nacional en zonas rurales del territorio nacional. 
                             </p>
                             <p class="text-stone-300 text-sm leading-relaxed">
-                                Al percatarse de las enormes esperas (a veces de años) y altos costos económicos que sufren campesinos vulnerables, militares heridos y personas de escasos recursos para acceder a prótesis médicas, decidimos innovar: **diseñar, modelar y fabricar prótesis totalmente gratuitas mediante impresión 3D**, empleando filamento termoplástico **PET reciclado**, obtenido del aprovechamiento de botellas plásticas descartadas.
+                                Al percatarse de las enormes esperas (a veces de años) y altos costos económicos que sufren campesinos vulnerables, militares heridos y personas de escaso presupuesto para acceder a prótesis médicas, decidimos innovar: **diseñar, modelar y fabricar prótesis totalmente gratuitas mediante impresión 3D**, empleando filamento termoplástico **PET reciclado**, obtenido del aprovechamiento de botellas plásticas descartadas.
                             </p>
                         </div>
 
@@ -565,7 +571,7 @@
                             <i class="fa-solid fa-location-dot text-eco-light text-lg"></i>
                             <div>
                                 <p class="text-[10px] text-stone-500">Presencia Nacional</p>
-                                <p class="font-bold text-white">Tuluá (Sede Fundadora), Bogotá, Medellín y más de Colombia</p>
+                                <p class="font-bold text-white">Sedes en Bogotá, Medellín, Tuluá y otras ciudades de Colombia</p>
                             </div>
                         </div>
                     </div>
@@ -617,7 +623,11 @@
     <footer class="w-full py-8 px-6 bg-black border-t border-stone-900 text-stone-500 text-xs mt-20">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex items-center space-x-3">
-                <img src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png" alt="Logo" class="h-9 w-9 object-contain rounded-full bg-stone-900 p-0.5 border border-eco/30" onerror="this.src='logo ecopiensa traspaewncia.png'">
+                <img id="footer-logo"
+                     src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png" 
+                     alt="Logo" 
+                     class="h-9 w-9 object-contain rounded-full bg-stone-900 p-0.5 border border-eco/30" 
+                     onerror="handleLogoError(this)">
                 <div>
                     <p class="font-bold text-stone-300">Fundación Ecopiensa Evolution</p>
                     <p class="text-[10px] text-stone-500">Tuluá, Valle del Cauca - Cobertura en toda Colombia.</p>
@@ -632,7 +642,7 @@
             </div>
         </div>
         <div class="max-w-6xl mx-auto text-center mt-6 pt-4 border-t border-stone-950 text-[10px] text-stone-600">
-            &copy; 2026 Fundación Ecopiensa Evolution. Todos los derechos reservados. Miel Ecopiensa Premium y el programa Ecobiónica son marcas registradas de la fundación.
+            &copy; 2026 Fundación Ecopiensa Evolution. Todos los derechos reservados. Miel Ecopiensa Premium y el programa Ecobiónica son iniciativas ecológicas patentadas.
         </div>
     </footer>
 
@@ -643,15 +653,68 @@
         let cameraStream = null;
         let arScore = 0;
 
-        // Instancias del motor Three.js para la abeja 3D interactiva
-        let scene, camera, renderer, beeGroup, wingLeft, wingRight, particles;
+        // Three.js instances for fully interactive 3D Bee
+        let scene, camera, renderer, beeGroup, wings = [], legsGroup, antennaeGroup;
         let animationFrameId = null;
         let clock = new THREE.Clock();
 
-        // Sintetizador de audio (Tone.js) para feedback orgánico
+        // Interactive movement state variables
+        let isDashing = false;
+        let dashStartTime = 0;
+        const dashDuration = 0.8; // seconds
+        let beeStartPos = new THREE.Vector3();
+        let beeEndPos = new THREE.Vector3();
+        let beeRotationYStart = 0;
+        let beeRotationYEnd = 0;
+
+        // Synth audio (Tone.js)
         let synth;
 
-        // Helper de Alertas Visuales (Toast notifications)
+        // Robust Fallback Handler for Ecopiensa Foundation Logo
+        function handleLogoError(img) {
+            if (!img.dataset.tryCount) {
+                img.dataset.tryCount = 1;
+            } else {
+                img.dataset.tryCount = parseInt(img.dataset.tryCount) + 1;
+            }
+            
+            const tries = [
+                "https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png", // double space raw URL
+                "https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png", // single space raw URL
+                "logo ecopiensa  traspaewncia.png", // local relative double space
+                "logo ecopiensa traspaewncia.png", // local relative single space
+                "https://placehold.co/200x200/047857/ffffff?text=Ecopiensa"
+            ];
+            
+            let index = parseInt(img.dataset.tryCount) - 1;
+            if (index < tries.length) {
+                img.src = tries[index];
+            }
+        }
+
+        // Robust Fallback Handler for Ecobiónica Program Logo
+        function handleEcobionicaError(img) {
+            if (!img.dataset.tryCount) {
+                img.dataset.tryCount = 1;
+            } else {
+                img.dataset.tryCount = parseInt(img.dataset.tryCount) + 1;
+            }
+
+            const tries = [
+                "https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecobionica%20con%20trasparencia.png",
+                "https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecobionica.PNG",
+                "logo ecobionica con trasparencia.png",
+                "logo ecobionica.PNG",
+                "https://placehold.co/400x120/10b981/ffffff?text=ECOBIONICA"
+            ];
+
+            let index = parseInt(img.dataset.tryCount) - 1;
+            if (index < tries.length) {
+                img.src = tries[index];
+            }
+        }
+
+        // Toast Messages helper
         function showToast(title, text, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -682,7 +745,7 @@
             }, 5500);
         }
 
-        // Navegación Dinámica entre secciones
+        // Dynamic views router
         function navigateTo(viewId) {
             document.getElementById('view-splash').classList.add('hidden');
             document.getElementById('view-ar').classList.add('hidden');
@@ -691,7 +754,7 @@
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
             activeView = viewId;
 
-            // Ocultar barra de navegación estándar en modo AR para máxima inmersión móvil
+            // Hide main menu header on AR layout for full screen
             const header = document.querySelector('header');
             if (viewId === 'ar') {
                 header.classList.add('-translate-y-full');
@@ -702,7 +765,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Desplazamiento preciso con anclaje
         function scrollToSection(id) {
             navigateTo('product-info');
             setTimeout(() => {
@@ -716,27 +778,25 @@
         function playBuzzSound() {
             try {
                 if (!synth) {
-                    // Configurando sintetizador con oscilador de onda triangular para simular un zumbido real de abejas
                     synth = new Tone.PolySynth(Tone.Synth).toDestination();
                     synth.set({
                         oscillator: { type: "triangle" },
-                        envelope: { attack: 0.1, decay: 0.1, sustain: 0.5, release: 0.6 }
+                        envelope: { attack: 0.05, decay: 0.08, sustain: 0.6, release: 0.4 }
                     });
                 }
                 const now = Tone.now();
-                // Secuencia armónica corta ascendente/descendente para imitar el vuelo rápido al huir
-                synth.triggerAttackRelease("D3", "32n", now);
-                synth.triggerAttackRelease("E3", "32n", now + 0.04);
-                synth.triggerAttackRelease("F#3", "16n", now + 0.08);
-                synth.triggerAttackRelease("D3", "8n", now + 0.12);
+                // Play chord-like harmonic hum ascending to represent flight dash
+                synth.triggerAttackRelease("E3", "16n", now);
+                synth.triggerAttackRelease("G#3", "16n", now + 0.04);
+                synth.triggerAttackRelease("B3", "8n", now + 0.08);
             } catch (error) {
-                console.log("Audio temporalmente inactivo: ", error);
+                console.log("Audio temporarily disabled: ", error);
             }
         }
 
         async function startAR() {
             navigateTo('ar');
-            showToast("Iniciando Realidad Aumentada", "Preparando la cámara del dispositivo y el motor gráfico interactivo 3D.", "info");
+            showToast("Iniciando Realidad Aumentada", "Preparando la cámara del dispositivo y el entorno gráfico 3D.", "info");
 
             const video = document.getElementById('ar-webcam');
             const fallbackBg = document.getElementById('ar-fallback-bg');
@@ -744,7 +804,7 @@
             arScore = 0;
             document.getElementById('ar-score').innerText = arScore;
 
-            // Intentar solicitar la cámara trasera del dispositivo móvil
+            // Request rear camera for maximum immersion
             try {
                 const constraints = {
                     video: { facingMode: "environment" },
@@ -753,23 +813,19 @@
                 cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = cameraStream;
                 video.classList.remove('hidden');
-                fallbackBg.classList.add('opacity-45'); // Fondo mixto para mantener contraste
-                showToast("Cámara Activa", "La abeja 3D se ha materializado sobre tu entorno físico. ¡Disfruta la experiencia!", "success");
+                fallbackBg.classList.add('opacity-40'); 
+                showToast("Cámara Activa", "La abeja 3D se ha proyectado sobre tu entorno físico. ¡Disfruta la experiencia!", "success");
             } catch (err) {
-                console.warn("Acceso a cámara rechazado o no disponible: ", err);
+                console.warn("Camera request blocked or unsupported: ", err);
                 video.classList.add('hidden');
-                fallbackBg.classList.remove('opacity-45'); // Carga fondo digital inmersivo por defecto
-                showToast("Modo Digital Iniciado", "La cámara está inactiva. Hemos cargado el santuario digital interactivo.", "info");
+                fallbackBg.classList.remove('opacity-40'); 
+                showToast("Modo Digital Iniciado", "Hemos cargado el santuario digital en 3D para tu visor.", "info");
             }
 
-            // Iniciar Audio Context
             await Tone.start();
-
-            // Renderizar la escena de Three.js
             initThreeJS();
         }
 
-        // Detener cámara y limpiar instancias 3D de WebGL
         function stopAR() {
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
@@ -796,119 +852,175 @@
             const width = container.clientWidth || window.innerWidth;
             const height = container.clientHeight || window.innerHeight;
 
-            // Escena
+            // Scene and Camera Setup
             scene = new THREE.Scene();
-
-            // Cámara
             camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-            camera.position.set(0, 0, 4.5);
+            camera.position.set(0, 0, 4.0);
 
-            // Renderizador
+            // WebGL Renderer Setup
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(width, height);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
 
-            // Iluminación ambiental y puntual dorada para la colmena
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            // Lighting Setup for realistic shadows and golden metallic sheen
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
             scene.add(ambientLight);
 
-            const amberLight = new THREE.PointLight(0xf59e0b, 3, 30);
-            amberLight.position.set(2, 4, 3);
-            scene.add(amberLight);
+            const spotLight = new THREE.SpotLight(0xfff7e6, 2.5);
+            spotLight.position.set(2, 5, 4);
+            scene.add(spotLight);
 
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(-2, 3, 2);
-            scene.add(dirLight);
-
-            // Creando la abeja procedural en 3D
+            // 3D BEE PROCEDURAL ASSET GENERATION
             beeGroup = new THREE.Group();
 
-            // Tórax (Esfera metálica dorada)
-            const thoraxGeo = new THREE.SphereGeometry(0.5, 32, 32);
+            // 1. Thorax (Realistic dark copper body with hair-like roughness)
+            const thoraxGeo = new THREE.SphereGeometry(0.55, 32, 32);
             const thoraxMat = new THREE.MeshStandardMaterial({
-                color: 0xd97706,
-                metalness: 0.85,
-                roughness: 0.15
+                color: 0x2b1e10,
+                roughness: 0.65,
+                metalness: 0.35,
+                bumpScale: 0.05
             });
             const thorax = new THREE.Mesh(thoraxGeo, thoraxMat);
             beeGroup.add(thorax);
 
-            // Cabeza (Esfera oscura)
-            const headGeo = new THREE.SphereGeometry(0.35, 32, 32);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0x1a1510, roughness: 0.4 });
+            // 2. Head (Dark shiny bug head)
+            const headGeo = new THREE.SphereGeometry(0.38, 32, 32);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0x140e08, roughness: 0.3 });
             const head = new THREE.Mesh(headGeo, headMat);
-            head.position.set(0, 0.15, 0.55);
+            head.position.set(0, 0.12, 0.6);
             beeGroup.add(head);
 
-            // Ojos Azules Brillantes (Inspirados en la ilustración original de la abeja de la miel)
-            const eyeGeo = new THREE.SphereGeometry(0.12, 16, 16);
+            // 3. Eyes (Compound realistic glassy deep-blue eyes as per product artwork)
+            const eyeGeo = new THREE.SphereGeometry(0.14, 16, 16);
             const eyeMat = new THREE.MeshStandardMaterial({
-                color: 0x2563eb,
-                emissive: 0x1e40af,
-                emissiveIntensity: 0.7,
-                roughness: 0.1
+                color: 0x1a45a3,
+                emissive: 0x0a1c52,
+                emissiveIntensity: 0.4,
+                roughness: 0.1,
+                metalness: 0.9
             });
             
             const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-            leftEye.position.set(-0.18, 0.22, 0.75);
+            leftEye.position.set(-0.2, 0.22, 0.78);
+            leftEye.scale.set(1, 1.4, 1);
+            
             const rightEye = leftEye.clone();
-            rightEye.position.x = 0.18;
+            rightEye.position.x = 0.2;
+            
             beeGroup.add(leftEye);
             beeGroup.add(rightEye);
 
-            // Abdomen de rayas alternas (Canvas Texture procedural)
-            const abdomenGeo = new THREE.CylinderGeometry(0.32, 0.45, 1.3, 32);
-            abdomenGeo.rotateX(Math.PI / 2); // Alinar de forma horizontal
+            // 4. Abdomen with explicit YELLOW, BLUE, RED stripes!
+            const abdomenGeo = new THREE.CylinderGeometry(0.36, 0.48, 1.4, 32);
+            abdomenGeo.rotateX(Math.PI / 2); // align along depth axis
             
             const stripeCanvas = document.createElement('canvas');
             stripeCanvas.width = 128;
             stripeCanvas.height = 128;
             const sCtx = stripeCanvas.getContext('2d');
-            sCtx.fillStyle = '#f59e0b'; // Amarillo dorado
-            sCtx.fillRect(0, 0, 128, 128);
-            sCtx.fillStyle = '#1c1917'; // Negro carbón
-            sCtx.fillRect(0, 25, 128, 18);
-            sCtx.fillRect(0, 65, 128, 18);
-            sCtx.fillRect(0, 105, 128, 18);
+            
+            // Build Yellow-Blue-Red flag stripes on abdomen texture
+            sCtx.fillStyle = '#f59e0b'; // Yellow Band (40% coverage at base)
+            sCtx.fillRect(0, 0, 128, 52);
+            
+            sCtx.fillStyle = '#0f172a'; // Black spacer ring
+            sCtx.fillRect(0, 52, 128, 6);
+            
+            sCtx.fillStyle = '#2563eb'; // Blue Band (30% coverage in center)
+            sCtx.fillRect(0, 58, 128, 34);
+            
+            sCtx.fillStyle = '#0f172a'; // Black spacer ring
+            sCtx.fillRect(0, 92, 128, 6);
+            
+            sCtx.fillStyle = '#dc2626'; // Red Band (30% coverage at tip)
+            sCtx.fillRect(0, 98, 128, 30);
             
             const stripeTexture = new THREE.CanvasTexture(stripeCanvas);
             const abdomenMat = new THREE.MeshStandardMaterial({
                 map: stripeTexture,
                 roughness: 0.25,
-                metalness: 0.5
+                metalness: 0.4
             });
             const abdomen = new THREE.Mesh(abdomenGeo, abdomenMat);
-            abdomen.position.set(0, -0.1, -0.8);
+            abdomen.position.set(0, -0.08, -0.85);
             beeGroup.add(abdomen);
 
-            // Alas Translúcidas con efecto de microtextura
-            const wingGeo = new THREE.BoxGeometry(0.85, 0.015, 0.32);
+            // 5. Delicate realistic insect legs (6 legs)
+            legsGroup = new THREE.Group();
+            const legMaterial = new THREE.MeshStandardMaterial({ color: 0x0f0b07, roughness: 0.8 });
+            
+            for (let i = 0; i < 6; i++) {
+                const legGroup = new THREE.Group();
+                const isLeft = i % 2 === 0;
+                const segment1 = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.4), legMaterial);
+                segment1.rotation.z = isLeft ? 0.8 : -0.8;
+                segment1.position.set(isLeft ? -0.2 : 0.2, -0.2, 0);
+                
+                const segment2 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.01, 0.4), legMaterial);
+                segment2.rotation.z = isLeft ? -0.4 : 0.4;
+                segment2.position.set(isLeft ? -0.38 : 0.38, -0.42, 0);
+                
+                legGroup.add(segment1);
+                legGroup.add(segment2);
+                
+                // Spread legs along thorax length
+                legGroup.position.z = -0.2 + (Math.floor(i / 2) * 0.22);
+                legsGroup.add(legGroup);
+            }
+            beeGroup.add(legsGroup);
+
+            // 6. Antennae (2 detailed feelers on front of head)
+            antennaeGroup = new THREE.Group();
+            for (let i = 0; i < 2; i++) {
+                const isLeft = i === 0;
+                const antenna = new THREE.Group();
+                const part1 = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.35), legMaterial);
+                part1.rotation.z = isLeft ? -0.5 : 0.5;
+                part1.rotation.y = isLeft ? 0.2 : -0.2;
+                part1.position.set(isLeft ? -0.1 : 0.1, 0.3, 0.8);
+                
+                antenna.add(part1);
+                antennaeGroup.add(antenna);
+            }
+            beeGroup.add(antennaeGroup);
+
+            // 7. Shimmering quad wings structure (2 big front wings, 2 smaller back wings)
             const wingMat = new THREE.MeshStandardMaterial({
-                color: 0x93c5fd,
+                color: 0xcfe2fe,
                 transparent: true,
-                opacity: 0.55,
-                roughness: 0.1,
-                metalness: 0.8
+                opacity: 0.6,
+                roughness: 0.05,
+                metalness: 0.95,
+                side: THREE.DoubleSide
             });
 
-            wingLeft = new THREE.Mesh(wingGeo, wingMat);
-            wingLeft.position.set(-0.7, 0.38, -0.1);
-            wingLeft.rotation.z = -0.22;
-            beeGroup.add(wingLeft);
+            // Wing sets (left big, left small, right big, right small)
+            const createWing = (w, h, x, y, z, rotZ, rotY) => {
+                const wingGeo = new THREE.BoxGeometry(w, 0.01, h);
+                const wing = new THREE.Mesh(wingGeo, wingMat);
+                wing.position.set(x, y, z);
+                wing.rotation.set(0, rotY, rotZ);
+                return wing;
+            };
 
-            wingRight = wingLeft.clone();
-            wingRight.position.x = 0.7;
-            wingRight.rotation.z = 0.22;
-            beeGroup.add(wingRight);
+            // Left side
+            wings.push(createWing(0.9, 0.38, -0.65, 0.42, -0.05, -0.18, 0.2));  // Front Big Left
+            wings.push(createWing(0.6, 0.26, -0.5, 0.35, -0.28, -0.22, 0.1));   // Rear Small Left
+            // Right side
+            wings.push(createWing(0.9, 0.38, 0.65, 0.42, -0.05, 0.18, -0.2));   // Front Big Right
+            wings.push(createWing(0.6, 0.26, 0.5, 0.35, -0.28, 0.22, -0.1));    // Rear Small Right
 
-            // Posición inicial dentro del rango visual
-            beeGroup.position.set(0, 0, 1.2);
+            wings.forEach(w => beeGroup.add(w));
+
+            // Set Initial safe location coordinate
+            beeGroup.position.set(0, 0, 1.0);
             scene.add(beeGroup);
 
-            // Partículas flotantes de polen brillante
+            // Hovering dust elements (Pollen glow sparks)
             const particleGeo = new THREE.BufferGeometry();
-            const particleCount = 75;
+            const particleCount = 60;
             const posArray = new Float32Array(particleCount * 3);
 
             for (let i = 0; i < particleCount * 3; i++) {
@@ -917,19 +1029,20 @@
 
             particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
             const particleMat = new THREE.PointsMaterial({
-                size: 0.07,
-                color: 0xf59e0b,
+                size: 0.08,
+                color: 0xfabf24,
                 transparent: true,
-                opacity: 0.75
+                opacity: 0.8
             });
 
-            particles = new THREE.Points(particleGeo, particleMat);
+            const particles = new THREE.Points(particleGeo, particleMat);
             scene.add(particles);
 
+            // Raycasting logic for precision touch detection
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
 
-            function handleTouchInteraction(event) {
+            function handleInteraction(event) {
                 let posX = 0;
                 let posY = 0;
 
@@ -941,7 +1054,6 @@
                     posY = event.clientY;
                 }
 
-                // Normalización de coordenadas para Three.js
                 mouse.x = (posX / window.innerWidth) * 2 - 1;
                 mouse.y = -(posY / window.innerHeight) * 2 + 1;
 
@@ -949,17 +1061,15 @@
                 const intersects = raycaster.intersectObjects(beeGroup.children, true);
 
                 if (intersects.length > 0) {
-                    onBeeCaptured();
+                    onBeeClicked();
                 }
             }
 
-            container.addEventListener('click', handleTouchInteraction);
-            container.addEventListener('touchstart', handleTouchInteraction);
+            container.addEventListener('mousedown', handleInteraction);
+            container.addEventListener('touchstart', handleInteraction);
 
-            // Iniciar ciclo de renderizado
+            // Launch Animation Loop
             animateThreeJS();
-
-            // Monitorear redimensionado de pantalla
             window.addEventListener('resize', onWindowResize);
         }
 
@@ -967,23 +1077,61 @@
             animationFrameId = requestAnimationFrame(animateThreeJS);
 
             const elapsedTime = clock.getElapsedTime();
+            const time = clock.getElapsedTime();
 
-            if (beeGroup) {
-                // Aleteo ultrarrápido dinámico
-                const flapSpeed = 45;
-                wingLeft.rotation.z = -Math.abs(Math.sin(elapsedTime * flapSpeed)) * 0.75 - 0.15;
-                wingRight.rotation.z = Math.abs(Math.sin(elapsedTime * flapSpeed)) * 0.75 + 0.15;
+            // 1. Dual Pair Wing flapping (flap speed scales dramatically if dashing)
+            const flapSpeed = isDashing ? 65 : 32;
+            
+            // Flap left front
+            wings[0].rotation.z = -Math.abs(Math.sin(time * flapSpeed)) * 0.7 - 0.1;
+            // Flap left rear
+            wings[1].rotation.z = -Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 - 0.1;
+            // Flap right front
+            wings[2].rotation.z = Math.abs(Math.sin(time * flapSpeed)) * 0.7 + 0.1;
+            // Flap right rear
+            wings[3].rotation.z = Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 + 0.1;
 
-                // Balanceo sutil para simular flotabilidad natural en el viento
-                beeGroup.position.y = Math.sin(elapsedTime * 2.8) * 0.2;
-                beeGroup.position.x = Math.cos(elapsedTime * 1.8) * 0.12;
-                beeGroup.rotation.z = Math.sin(elapsedTime * 2.2) * 0.08;
-                beeGroup.rotation.y = Math.cos(elapsedTime * 1.4) * 0.08;
-            }
+            // 2. Realistic Leg twitching during flight
+            legsGroup.children.forEach((leg, index) => {
+                leg.rotation.x = Math.sin(time * 6 + index) * 0.1;
+            });
 
-            if (particles) {
-                particles.rotation.y = elapsedTime * 0.04;
-                particles.rotation.x = elapsedTime * 0.02;
+            // 3. Realistic Antennae twitching
+            antennaeGroup.children.forEach((ant, index) => {
+                ant.rotation.y = Math.sin(time * 8 + index) * 0.12;
+            });
+
+            // 4. Position and Navigation Management
+            if (isDashing) {
+                // Dash linear interpolation progress
+                const durationElapsed = time - dashStartTime;
+                const progress = Math.min(durationElapsed / dashDuration, 1);
+                
+                // Smooth ease-out cubic interpolation curve
+                const t = 1 - Math.pow(1 - progress, 3);
+
+                // Update Position
+                beeGroup.position.lerpVectors(beeStartPos, beeEndPos, t);
+                
+                // Dynamic Orientation turning towards heading
+                beeGroup.rotation.y = beeRotationYStart + (beeRotationYEnd - beeRotationYStart) * t;
+
+                // Stop Dash state when destination is successfully reached
+                if (progress >= 1) {
+                    isDashing = false;
+                }
+            } else {
+                // Smooth hovering wandering (Idle state wave offsets)
+                const hoverOffset = new THREE.Vector3(
+                    Math.sin(time * 1.6) * 0.25,
+                    Math.cos(time * 1.2) * 0.22,
+                    Math.sin(time * 0.8) * 0.18
+                );
+                
+                // Gentle breathing tilt rotation
+                beeGroup.rotation.z = Math.sin(time * 1.8) * 0.05;
+                beeGroup.rotation.x = Math.cos(time * 1.1) * 0.04;
+                beeGroup.rotation.y += Math.sin(time * 0.5) * 0.005; // natural slow rotate
             }
 
             renderer.render(scene, camera);
@@ -1001,47 +1149,49 @@
             renderer.setSize(width, height);
         }
 
-        function onBeeCaptured() {
+        // Escape flight algorithm (Launches bee dynamically across entire 3D camera frustum)
+        function onBeeClicked() {
+            if (isDashing) return; // ignore clicks mid-flight
+
             arScore++;
             document.getElementById('ar-score').innerText = arScore;
 
-            // Reproducir feedback acústico
+            // Synthesis sound trigger
             playBuzzSound();
 
-            // Animación visual de impacto en marcador
-            const scoreEl = document.getElementById('ar-score').parentElement;
-            scoreEl.classList.add('scale-125', 'text-amber-400');
+            // Trigger score bump animation
+            const scoreBadge = document.getElementById('ar-score').parentElement;
+            scoreBadge.classList.add('scale-125', 'text-amber-400');
             setTimeout(() => {
-                scoreEl.classList.remove('scale-125', 'text-amber-400');
-            }, 200);
+                scoreBadge.classList.remove('scale-125', 'text-amber-400');
+            }, 250);
 
-            // Posiciones aleatorias de reubicación dentro del rango seguro de la cámara
-            const targetX = (Math.random() - 0.5) * 2.2;
-            const targetY = (Math.random() - 0.5) * 1.6;
-            const targetZ = 0.8 + (Math.random() * 1.4); 
+            // Compute massive dynamic flight vector
+            isDashing = true;
+            dashStartTime = clock.getElapsedTime();
 
-            // Interpolar matemáticamente el movimiento hacia la nueva posición
-            let step = 0;
-            const initX = beeGroup.position.x;
-            const initY = beeGroup.position.y;
-            const initZ = beeGroup.position.z;
+            // Store departure coordinates
+            beeStartPos.copy(beeGroup.position);
+            
+            // Randomize new safe view boundaries coordinates
+            const randX = (Math.random() - 0.5) * 2.8; // far left / far right
+            const randY = (Math.random() - 0.5) * 2.2; // up / down
+            const randZ = 0.5 + (Math.random() * 1.5); // near / far depth
 
-            function smoothMove() {
-                step += 0.15;
-                if (step <= 1) {
-                    beeGroup.position.x = initX + (targetX - initX) * step;
-                    beeGroup.position.y = initY + (targetY - initY) * step;
-                    beeGroup.position.z = initZ + (targetZ - initZ) * step;
-                    requestAnimationFrame(smoothMove);
-                }
-            }
-            smoothMove();
+            beeEndPos.set(randX, randY, randZ);
 
-            // Mensaje motivador interactivo por metas de toques
+            // Calculate directional angle difference to rotate face-first towards next location
+            const deltaX = randX - beeStartPos.x;
+            const deltaZ = randZ - beeStartPos.z;
+            
+            beeRotationYStart = beeGroup.rotation.y;
+            beeRotationYEnd = Math.atan2(deltaX, deltaZ);
+
+            // Toast achievements alerts
             if (arScore === 1) {
-                showToast("¡Vuela rápido!", "La abeja detectó tu toque y se trasladó. ¡Sigue intentándolo!", "info");
-            } else if (arScore === 4) {
-                showToast("¡Buen ritmo!", "Has interactuado eficientemente. Recuerda que puedes continuar con el producto cuando gustes.", "success");
+                showToast("¡Buen reflejo!", "La abeja sintió tu toque y escapó con fuerza hacia otra posición.", "success");
+            } else if (arScore === 5) {
+                showToast("¡Velocidad Apícola!", "Estás dominando la captura. Recuerda que este divertido juego representa la reubicación de abejas.", "success");
             }
         }
 
@@ -1052,16 +1202,13 @@
             document.getElementById('calc-honey-val').innerText = `${honeyCount} ${honeyCount === 1 ? 'Frasco' : 'Frascos'}`;
             document.getElementById('calc-pet-val').innerText = `${petTons} ${petTons === 1 ? 'Tonelada' : 'Toneladas'}`;
 
-            // Ecuación de impacto social (Cada frasco de miel y tonelada de PET financian horas de modelado e impresión)
             const estimatedHours = Math.round((honeyCount * 2.5) + (petTons * 35));
-            // Estimado de prótesis terminadas y ensambladas (aproximadamente una prótesis cada 110 horas de manufactura/estudio)
             const prostheticsFunded = Math.max(1, Math.floor(estimatedHours / 110));
 
             document.getElementById('res-hours').innerText = `${estimatedHours} hrs`;
             document.getElementById('res-prosthetics').innerText = `${prostheticsFunded}`;
         }
 
-        // Procesamiento del formulario de contacto
         function handleContactSubmit(event) {
             event.preventDefault();
             
@@ -1076,14 +1223,13 @@
 
             showToast(
                 "¡Mensaje Recibido!",
-                `Gracias por contactarnos, ${name}. Procesaremos tu solicitud sobre "${typeText}" y te contactaremos en ${email}.`,
+                `Gracias por contactarnos. Procesaremos tu solicitud sobre "${typeText}" y nos comunicaremos contigo a: ${email}.`,
                 "success"
             );
 
             event.target.reset();
         }
 
-        // Carga inicial y simulación
         window.onload = function () {
             updateCalculator();
         };
