@@ -63,6 +63,39 @@
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(16, 185, 129, 0.22);
         }
+        /* Estilos ultra-robustos para forzar la cámara y el canvas 3D a pantalla completa */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            overflow: hidden;
+            z-index: 10;
+        }
+        #canvas-container video {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            min-width: 100vw !important;
+            min-height: 100vh !important;
+            width: auto !important;
+            height: auto !important;
+            object-fit: cover !important;
+            z-index: 1 !important;
+        }
+        #canvas-container canvas {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            min-width: 100vw !important;
+            min-height: 100vh !important;
+            width: auto !important;
+            height: auto !important;
+            z-index: 2 !important;
+        }
         /* Custom Keyframe Animations for Natural Floating Effects */
         @keyframes float-bee {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -206,8 +239,8 @@
                 </button>
             </div>
 
-            <!-- Active Computer Vision Scanning HUD overlays -->
-            <div id="ar-scanner-hud" class="absolute inset-0 z-15 pointer-events-none flex flex-col justify-center items-center">
+            <!-- Active Computer Vision Scanning HUD overlays - Con transiciones de opacidad para ocultarse limpiamente -->
+            <div id="ar-scanner-hud" class="absolute inset-0 z-15 pointer-events-none flex flex-col justify-center items-center transition-all duration-500">
                 
                 <!-- Target Reticle Overlay -->
                 <div id="scan-reticle" class="w-64 h-64 border-2 border-dashed border-red-500/40 rounded-3xl relative flex items-center justify-center animate-pulse-scan transition-all duration-300">
@@ -945,6 +978,7 @@
         }
 
         function updateScannerHUDState(isLocked) {
+            const scannerHud = document.getElementById('ar-scanner-hud');
             const reticle = document.getElementById('scan-reticle');
             const statusText = document.getElementById('scan-status-text');
             const progressBar = document.getElementById('scan-bar-progress');
@@ -952,6 +986,9 @@
             if (!reticle) return;
 
             if (isLocked) {
+                // Ocultar la retícula y guías visuales completamente cuando la abeja está cargada
+                scannerHud.classList.add('opacity-0', 'pointer-events-none');
+                
                 reticle.classList.remove('border-red-500/40');
                 reticle.classList.add('border-eco-light', 'scale-105');
                 statusText.innerText = "¡Abeja Detectada!";
@@ -965,6 +1002,9 @@
                     beeGroup.visible = true;
                 }
             } else {
+                // Mostrar la retícula cuando volvemos a buscar el tarro
+                scannerHud.classList.remove('opacity-0', 'pointer-events-none');
+                
                 reticle.classList.add('border-red-500/40');
                 reticle.classList.remove('border-eco-light', 'scale-105');
                 statusText.innerText = "Buscando Etiqueta...";
@@ -1020,40 +1060,58 @@
             beeGroup.add(leftEye);
             beeGroup.add(rightEye);
 
-            // 4. Abdomen with explicit YELLOW, BLUE, RED stripes!
-            const abdomenGeo = new THREE.CylinderGeometry(0.36, 0.48, 1.4, 32);
-            abdomenGeo.rotateX(Math.PI / 2); // align along depth axis
-            
-            const stripeCanvas = document.createElement('canvas');
-            stripeCanvas.width = 128;
-            stripeCanvas.height = 128;
-            const sCtx = stripeCanvas.getContext('2d');
-            
-            // Build Yellow-Blue-Red flag stripes on abdomen texture
-            sCtx.fillStyle = '#f59e0b'; // Yellow Band (40% coverage at base)
-            sCtx.fillRect(0, 0, 128, 52);
-            
-            sCtx.fillStyle = '#0f172a'; // Black spacer ring
-            sCtx.fillRect(0, 52, 128, 6);
-            
-            sCtx.fillStyle = '#2563eb'; // Blue Band (30% coverage in center)
-            sCtx.fillRect(0, 58, 128, 34);
-            
-            sCtx.fillStyle = '#0f172a'; // Black spacer ring
-            sCtx.fillRect(0, 92, 128, 6);
-            
-            sCtx.fillStyle = '#dc2626'; // Red Band (30% coverage at tip)
-            sCtx.fillRect(0, 98, 128, 30);
-            
-            const stripeTexture = new THREE.CanvasTexture(stripeCanvas);
-            const abdomenMat = new THREE.MeshStandardMaterial({
-                map: stripeTexture,
-                roughness: 0.25,
-                metalness: 0.4
-            });
-            const abdomen = new THREE.Mesh(abdomenGeo, abdomenMat);
-            abdomen.position.set(0, -0.08, -0.85);
-            beeGroup.add(abdomen);
+            // 4. Abdomen segmentado premium tricolor (Amarillo, Azul y Rojo) con aguijón
+            const abdomenGroup = new THREE.Group();
+
+            // Segmento 1: Amarillo (Base del abdomen)
+            const seg1Geo = new THREE.CylinderGeometry(0.42, 0.48, 0.35, 16);
+            const seg1Mat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.3 });
+            const seg1 = new THREE.Mesh(seg1Geo, seg1Mat);
+            seg1.rotation.x = Math.PI / 2;
+            seg1.position.z = -0.15;
+            abdomenGroup.add(seg1);
+
+            // Segmento 2: Espaciador negro
+            const seg2Geo = new THREE.CylinderGeometry(0.47, 0.47, 0.08, 16);
+            const seg2Mat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.5 });
+            const seg2 = new THREE.Mesh(seg2Geo, seg2Mat);
+            seg2.rotation.x = Math.PI / 2;
+            seg2.position.z = -0.32;
+            abdomenGroup.add(seg2);
+
+            // Segmento 3: Azul (Parte central)
+            const seg3Geo = new THREE.CylinderGeometry(0.45, 0.4, 0.35, 16);
+            const seg3Mat = new THREE.MeshStandardMaterial({ color: 0x1e40af, roughness: 0.3, metalness: 0.4 });
+            const seg3 = new THREE.Mesh(seg3Geo, seg3Mat);
+            seg3.rotation.x = Math.PI / 2;
+            seg3.position.z = -0.5;
+            abdomenGroup.add(seg3);
+
+            // Segmento 4: Espaciador negro
+            const seg4Geo = new THREE.CylinderGeometry(0.39, 0.39, 0.08, 16);
+            const seg4 = new THREE.Mesh(seg4Geo, seg2Mat);
+            seg4.rotation.x = Math.PI / 2;
+            seg4.position.z = -0.68;
+            abdomenGroup.add(seg4);
+
+            // Segmento 5: Rojo (Punta)
+            const seg5Geo = new THREE.CylinderGeometry(0.38, 0.2, 0.35, 16);
+            const seg5Mat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3, metalness: 0.3 });
+            const seg5 = new THREE.Mesh(seg5Geo, seg5Mat);
+            seg5.rotation.x = Math.PI / 2;
+            seg5.position.z = -0.85;
+            abdomenGroup.add(seg5);
+
+            // Segmento 6: Aguijón metálico realista
+            const stingerGeo = new THREE.ConeGeometry(0.08, 0.2, 8);
+            const stingerMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.9 });
+            const stinger = new THREE.Mesh(stingerGeo, stingerMat);
+            stinger.rotation.x = -Math.PI / 2;
+            stinger.position.set(0, -0.05, -1.05);
+            abdomenGroup.add(stinger);
+
+            abdomenGroup.position.set(0, -0.08, -0.2);
+            beeGroup.add(abdomenGroup);
 
             // 5. Delicate realistic insect legs (6 legs)
             legsGroup = new THREE.Group();
