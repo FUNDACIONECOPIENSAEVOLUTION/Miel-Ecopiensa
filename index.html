@@ -4,233 +4,603 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Miel Ecopiensa - Realidad Aumentada & Impacto Ecobiónica</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        amber: {
-                            50: '#fffbeb',
-                            100: '#fef3c7',
-                            200: '#fde68a',
-                            400: '#fbbf24',
-                            500: '#f59e0b',
-                            600: '#d97706',
-                            900: '#78350f',
+                        honey: {
+                            50:  '#FFFBF0',
+                            100: '#FFF8E7',
+                            200: '#FDF3DC',
+                            300: '#FCD34D',
+                            400: '#FBBF24',
+                            500: '#F59E0B',
+                            600: '#D97706',
+                            700: '#B45309',
+                            800: '#92400E',
+                            900: '#78350F',
+                        },
+                        cream: {
+                            DEFAULT: '#FFF8E7',
+                            dark: '#FDF3DC',
+                            darker: '#F5E6C8',
+                        },
+                        ink: {
+                            DEFAULT: '#3D2817',
+                            light: '#6B5239',
+                            muted: '#8B6F47',
+                            soft: '#A88B6A',
                         },
                         eco: {
-                            light: '#34d399',
-                            DEFAULT: '#10b981',
+                            light: '#34D399',
+                            DEFAULT: '#10B981',
                             dark: '#047857',
                         }
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
             }
         }
     </script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght=0,600;0,700;1,500&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Librerías de AR, Audio y Visión Artificial -->
+
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.5/dist/mindar-image-three.prod.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
     <style>
+        :root {
+            --honey-50: #FFFBF0;
+            --honey-100: #FFF8E7;
+            --honey-500: #F59E0B;
+            --honey-600: #D97706;
+            --honey-700: #B45309;
+            --ink: #3D2817;
+            --ink-light: #6B5239;
+            --ink-muted: #8B6F47;
+            --eco-light: #34D399;
+            --eco: #10B981;
+            --eco-dark: #047857;
+        }
+
+        html, body { scroll-behavior: smooth; }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #060504;
-            color: #f5f5f4;
+            color: var(--ink);
+            background-color: #FFFBF0;
+            /* Patrón panal de abeja sutil */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cg fill='none' stroke='%23F59E0B' stroke-opacity='0.07' stroke-width='1'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34'/%3E%3C/g%3E%3C/svg%3E");
+            background-attachment: fixed;
             overflow-x: hidden;
         }
-        .font-serif {
-            font-family: 'Playfair Display', serif;
-        }
-        /* Premium Frosted Glassmorphism for Containers */
+
+        .font-serif { font-family: 'Playfair Display', serif; }
+
+        /* ===== Tarjetas Warm ===== */
         .glass-premium {
-            background: rgba(18, 14, 10, 0.85);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            background: #FFFFFF;
             border: 1px solid rgba(245, 158, 11, 0.18);
+            box-shadow: 0 6px 24px -10px rgba(180, 83, 9, 0.22), 0 1px 3px rgba(180, 83, 9, 0.06);
         }
         .glass-eco {
-            background: rgba(6, 15, 12, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: linear-gradient(180deg, #F0FDF4 0%, #ECFDF5 100%);
             border: 1px solid rgba(16, 185, 129, 0.22);
+            box-shadow: 0 6px 24px -12px rgba(4, 120, 87, 0.18);
         }
-        /* Estilos ultra-robustos para forzar la cámara y el canvas 3D a pantalla completa */
+
+        .card-warm {
+            background: #FFFFFF;
+            border: 1px solid rgba(245, 158, 11, 0.15);
+            box-shadow: 0 4px 20px -8px rgba(180, 83, 9, 0.15);
+            border-radius: 1.25rem;
+        }
+
+        /* ===== Canvas AR a pantalla completa (se mantiene oscuro por la cámara) ===== */
         #canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw !important;
-            height: 100vh !important;
-            overflow: hidden;
-            z-index: 10;
+            position: absolute; top: 0; left: 0;
+            width: 100vw !important; height: 100vh !important;
+            overflow: hidden; z-index: 10;
         }
         #canvas-container video {
-            position: absolute !important;
-            top: 50% !important;
-            left: 50% !important;
+            position: absolute !important; top: 50% !important; left: 50% !important;
             transform: translate(-50%, -50%) !important;
-            min-width: 100vw !important;
-            min-height: 100vh !important;
-            width: auto !important;
-            height: auto !important;
-            object-fit: cover !important;
-            z-index: 1 !important;
+            min-width: 100vw !important; min-height: 100vh !important;
+            width: auto !important; height: auto !important;
+            object-fit: cover !important; z-index: 1 !important;
         }
         #canvas-container canvas {
-            position: absolute !important;
-            top: 50% !important;
-            left: 50% !important;
+            position: absolute !important; top: 50% !important; left: 50% !important;
             transform: translate(-50%, -50%) !important;
-            min-width: 100vw !important;
-            min-height: 100vh !important;
-            width: auto !important;
-            height: auto !important;
+            min-width: 100vw !important; min-height: 100vh !important;
+            width: auto !important; height: auto !important;
             z-index: 2 !important;
         }
-        /* Custom Keyframe Animations for Natural Floating Effects */
+
+        /* ===== Animaciones ===== */
         @keyframes float-bee {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-8px) rotate(1deg); }
         }
-        .animate-float {
-            animation: float-bee 6s infinite ease-in-out;
-        }
+        .animate-float { animation: float-bee 6s infinite ease-in-out; }
+
         @keyframes pulse-scan {
             0%, 100% { opacity: 0.2; transform: scale(0.96); }
             50% { opacity: 0.85; transform: scale(1.03); }
         }
-        .animate-pulse-scan {
-            animation: pulse-scan 2.5s infinite ease-in-out;
+        .animate-pulse-scan { animation: pulse-scan 2.5s infinite ease-in-out; }
+
+        /* ===== HERO con video ===== */
+        #hero-wrapper { position: relative; width: 100%; }
+        .hero-section {
+            position: relative; width: 100%; min-height: 100vh;
+            display: flex; overflow: hidden; background: #FFF8E7;
+        }
+        .hero-video {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 0;
+            animation: heroVideoIn 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+        @keyframes heroVideoIn {
+            from { opacity: 0; transform: scale(1.05); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        /* Overlay: arriba marrón miel, abajo funde a crema */
+        .hero-scrim {
+            position: absolute; inset: 0; z-index: 1; pointer-events: none;
+            background:
+                radial-gradient(ellipse at 50% 40%, rgba(217,119,6,0.10), rgba(120,53,15,0.62) 78%),
+                linear-gradient(to bottom,
+                    rgba(61,40,23,0.82) 0%,
+                    rgba(120,53,15,0.32) 24%,
+                    rgba(120,53,15,0.50) 58%,
+                    #FFFBF0 100%);
+        }
+        .hero-grid-lines {
+            position: absolute; inset: 0; z-index: 1; opacity: .22; pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(252,211,77,.25) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(252,211,77,.25) 1px, transparent 1px);
+            background-size: 90px 90px;
+            mask-image: radial-gradient(ellipse at center, #000 8%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at center, #000 8%, transparent 70%);
+        }
+
+        @keyframes heroUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .hero-anim { opacity: 0; animation: heroUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .d-1 { animation-delay: 0.35s; }
+        .d-2 { animation-delay: 0.55s; }
+        .d-3 { animation-delay: 0.75s; }
+        .d-4 { animation-delay: 0.95s; }
+        .d-5 { animation-delay: 1.15s; }
+
+        @keyframes bobDown {
+            0%, 100% { transform: translateY(0); opacity: .75; }
+            50% { transform: translateY(8px); opacity: 1; }
+        }
+        .animate-bob { animation: bobDown 2.2s infinite ease-in-out; }
+
+        /* ===== Reveal on scroll ===== */
+        .reveal {
+            opacity: 0; transform: translateY(26px);
+            transition: opacity .85s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform .85s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+        .reveal.is-visible { opacity: 1; transform: none; }
+
+        /* ===== Galería ===== */
+        .gallery-item {
+            position: relative; overflow: hidden; border-radius: 1rem;
+            border: 1px solid rgba(245, 158, 11, 0.22);
+            background: #FFF8E7; cursor: pointer;
+            box-shadow: 0 12px 30px -18px rgba(180, 83, 9, 0.45);
+            transition: transform .5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .5s;
+        }
+        .gallery-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -18px rgba(245, 158, 11, 0.55);
+        }
+        .gallery-item img {
+            width: 100%; height: 100%; aspect-ratio: 4 / 5;
+            object-fit: cover; display: block;
+            transition: transform .8s cubic-bezier(0.16, 1, 0.3, 1), filter .5s ease;
+            filter: saturate(.95) brightness(.98);
+        }
+        .gallery-item:hover img { transform: scale(1.08); filter: saturate(1.1) brightness(1.05); }
+        .gallery-item figcaption {
+            position: absolute; left: 0; right: 0; bottom: 0;
+            padding: 1.6rem .8rem .7rem;
+            font-size: 10px; letter-spacing: .07em; text-transform: uppercase;
+            font-weight: 700; color: #FFFBEB;
+            background: linear-gradient(to top, rgba(120,53,15,.94), rgba(120,53,15,.55) 45%, transparent);
+            transform: translateY(6px); opacity: .95;
+            transition: transform .5s cubic-bezier(0.16, 1, 0.3, 1), opacity .4s;
+        }
+        .gallery-item:hover figcaption { transform: translateY(0); opacity: 1; }
+
+        /* ===== Lightbox ===== */
+        .lightbox {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(61, 40, 23, 0.92);
+            backdrop-filter: blur(12px);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 24px; gap: 16px;
+            animation: heroUp .35s ease forwards;
+        }
+        .lightbox img {
+            max-width: min(92vw, 900px); max-height: 76vh;
+            object-fit: contain; border-radius: 18px;
+            border: 1px solid rgba(252, 211, 77, 0.55);
+            box-shadow: 0 40px 90px -30px rgba(0,0,0,0.6);
+        }
+        .lightbox-caption {
+            font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+            color: #FCD34D; font-weight: 700;
+        }
+        .lightbox-close {
+            position: absolute; top: 22px; right: 26px;
+            width: 44px; height: 44px; border-radius: 999px;
+            background: rgba(255,255,255,.12); color: #FFF;
+            border: 1px solid rgba(252,211,77,.4);
+            font-size: 22px; line-height: 1; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .25s;
+        }
+        .lightbox-close:hover { background: #F59E0B; color: #3D2817; border-color: #F59E0B; }
+
+        /* ===== Hero Pills ===== */
+        .hero-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 15px; border-radius: 999px;
+            font-size: 11px; font-weight: 600; letter-spacing: .04em;
+            background: rgba(255, 251, 240, 0.14);
+            border: 1px solid rgba(252, 211, 77, 0.45);
+            color: #FEF3C7;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 14px -6px rgba(0,0,0,0.35);
+        }
+
+        /* ===== Botones ===== */
+        .btn-honey {
+            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 45%, #D97706 100%);
+            color: #3D2817;
+            box-shadow: 0 8px 22px -8px rgba(245, 158, 11, 0.65);
+            transition: all .3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-honey:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px -8px rgba(245, 158, 11, 0.8);
+        }
+
+        .btn-outline-honey {
+            border: 1.5px solid rgba(255, 251, 240, 0.5);
+            color: #FFFBEB;
+            background: rgba(255, 251, 240, 0.06);
+            transition: all .3s;
+        }
+        .btn-outline-honey:hover {
+            background: rgba(255, 251, 240, 0.16);
+            border-color: #FCD34D;
+        }
+
+        /* ===== Inputs ===== */
+        .form-input {
+            background: #FFFBF0;
+            border: 1.5px solid rgba(180, 83, 9, 0.18);
+            color: var(--ink);
+            border-radius: 0.65rem;
+            padding: 0.7rem 0.9rem;
+            outline: none;
+            transition: all .25s;
+            font-size: 12px;
+            width: 100%;
+        }
+        .form-input:focus {
+            border-color: var(--honey-500);
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.14);
+            background: #FFFFFF;
+        }
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ink-light);
+            margin-bottom: 0.35rem;
+        }
+
+        /* ===== Sliders ===== */
+        input[type=range] {
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 6px; border-radius: 999px;
+            background: #F5E6C8; outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: linear-gradient(135deg, #FBBF24, #D97706);
+            border: 2px solid #FFFFFF;
+            box-shadow: 0 2px 8px rgba(180, 83, 9, 0.4);
+            cursor: pointer;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 20px; height: 20px; border-radius: 50%;
+            background: linear-gradient(135deg, #FBBF24, #D97706);
+            border: 2px solid #FFFFFF;
+            box-shadow: 0 2px 8px rgba(180, 83, 9, 0.4);
+            cursor: pointer;
+        }
+
+        /* ===== Scrollbar ===== */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #FDF3DC; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(#F59E0B, #B45309); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #92400E; }
+
+        /* ===== Divider ===== */
+        .divider-honey {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(245,158,11,.35), transparent);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+<body class="min-h-screen flex flex-col justify-between selection:bg-honey-500 selection:text-ink">
 
-    <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-md pointer-events-none"></div>
+    <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[60] w-11/12 max-w-md pointer-events-none"></div>
 
-    <header class="w-full py-4 px-6 glass-premium border-b border-amber-500/10 fixed top-0 left-0 z-40 transition-all duration-300">
+    <!-- ===== HEADER ===== -->
+    <header class="w-full py-4 px-6 fixed top-0 left-0 z-40 transition-all duration-300"
+            style="background: rgba(255,251,240,0.85); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-bottom: 1px solid rgba(245,158,11,0.18);">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('splash')">
-                <img id="header-logo" 
-                     src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png" 
-                     alt="Logo Ecopiensa" 
-                     class="h-10 w-10 object-contain rounded-full bg-black/40 p-1 border border-eco" 
-                     onerror="handleLogoError(this)">
+                <div class="relative">
+                    <div class="absolute inset-0 rounded-full blur-md" style="background: radial-gradient(circle, rgba(245,158,11,.5), transparent 70%);"></div>
+                    <img id="header-logo"
+                         src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png"
+                         alt="Logo Ecopiensa"
+                         class="relative h-11 w-11 object-contain rounded-full p-1 border border-honey-500/30"
+                         style="background: linear-gradient(135deg, #FEF3C7, #FDE68A);"
+                         onerror="handleLogoError(this)">
+                </div>
                 <div>
-                    <h1 class="text-sm font-bold text-amber-400 tracking-wider">ECOPIENSA</h1>
-                    <p class="text-[9px] text-eco-light tracking-widest uppercase">Evolution</p>
+                    <h1 class="text-sm font-extrabold tracking-wider" style="color: #78350F;">ECOPIENSA</h1>
+                    <p class="text-[9px] font-semibold tracking-[0.18em] uppercase" style="color: #047857;">Evolution</p>
                 </div>
             </div>
-            <nav class="hidden md:flex space-x-6 text-sm font-medium">
-                <button onclick="navigateTo('splash')" class="hover:text-amber-400 transition">Inicio</button>
-                <button onclick="startAR()" class="text-amber-400 hover:text-amber-300 transition flex items-center gap-1.5">
+
+            <nav class="hidden md:flex space-x-6 text-sm font-medium" style="color: #6B5239;">
+                <button onclick="navigateTo('splash')" class="hover:text-honey-600 transition font-semibold">Inicio</button>
+                <button onclick="startAR()" class="text-honey-600 hover:text-honey-700 transition flex items-center gap-1.5 font-semibold">
                     <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-ping"></span> Realidad Aumentada
                 </button>
-                <button onclick="navigateTo('product-info')" class="hover:text-amber-400 transition">Nuestra Miel</button>
-                <button onclick="scrollToSection('ecobionica')" class="hover:text-eco-light transition font-semibold">Ecobiónica</button>
-                <button onclick="scrollToSection('contact')" class="hover:text-amber-400 transition">Contacto</button>
+                <button onclick="navigateTo('product-info')" class="hover:text-honey-600 transition font-semibold">Nuestra Miel</button>
+                <button onclick="scrollToSection('ecobionica')" class="hover:text-eco-dark transition font-semibold">Ecobiónica</button>
+                <button onclick="scrollToSection('contact')" class="hover:text-honey-600 transition font-semibold">Contacto</button>
             </nav>
-            <button onclick="startAR()" class="bg-gradient-to-r from-amber-500 to-amber-600 text-black font-extrabold px-4 py-2 rounded-full text-xs hover:from-amber-400 hover:to-amber-500 transition shadow-lg shadow-amber-500/20 flex items-center space-x-1.5">
+
+            <button onclick="startAR()" class="btn-honey font-extrabold px-4 py-2 rounded-full text-xs flex items-center space-x-1.5">
                 <i class="fa-solid fa-camera"></i>
                 <span>Escanear Tarro</span>
             </button>
         </div>
     </header>
 
+    <!-- ===== HERO CON VIDEO ===== -->
+    <div id="hero-wrapper">
+        <section class="hero-section">
+            <video class="hero-video" autoplay muted loop playsinline preload="auto">
+                <source src="un_video_de_presentacion_de_pr.mp4" type="video/mp4">
+                Tu navegador no admite video HTML5.
+            </video>
+
+            <div class="hero-scrim"></div>
+            <div class="hero-grid-lines"></div>
+
+            <div class="relative z-[2] w-full max-w-6xl mx-auto px-6 pt-28 pb-10 min-h-screen flex flex-col justify-between">
+
+                <div class="flex-1 flex flex-col items-center justify-center text-center">
+                    <span class="hero-pill hero-anim d-1">
+                        <i class="fa-solid fa-leaf" style="color:#6EE7B7;"></i>
+                        Fundación Ecopiensa Evolution · NIT 900998128-1
+                    </span>
+
+                    <h1 class="hero-anim d-2 mt-6 font-serif leading-[0.95] tracking-[-0.03em]"
+                        style="font-weight:300; font-size: clamp(2.4rem, 9vw, 5rem); color: #FFFBEB; text-shadow: 0 4px 24px rgba(61,40,23,0.6);">
+                        Miel
+                        <span style="background: linear-gradient(135deg, #FDE68A 0%, #FBBF24 45%, #F59E0B 100%); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; filter: drop-shadow(0 4px 14px rgba(245,158,11,0.5));">Ecopiensa</span>
+                    </h1>
+
+                    <p class="hero-anim d-3 mt-6 max-w-2xl text-sm sm:text-base leading-relaxed" style="color: #FEF3C7; text-shadow: 0 2px 12px rgba(61,40,23,0.7);">
+                        Miel 100% pura de colmenas rescatadas en Cundinamarca. Cada frasco financia el programa de
+                        prótesis biónicas gratuitas <strong style="color:#6EE7B7;">ECOBIÓNICA</strong>.
+                    </p>
+
+                    <div class="hero-anim d-4 mt-9 flex flex-col sm:flex-row items-center gap-3">
+                        <button onclick="startAR()" class="btn-honey font-extrabold text-[13px] px-7 py-3.5 rounded-full flex items-center gap-2">
+                            <i class="fa-solid fa-cube"></i> Ver en Realidad Aumentada
+                        </button>
+                        <button onclick="scrollToGaleria()" class="btn-outline-honey text-[13px] font-semibold px-7 py-3.5 rounded-full">
+                            Ver Galería de Fotos
+                        </button>
+                        <button onclick="navigateTo('product-info')" class="text-[13px] font-semibold px-7 py-3.5 rounded-full transition"
+                                style="border: 1.5px solid rgba(110,231,183,.5); color: #A7F3D0; background: rgba(16,185,129,.12);">
+                            Conocer el Proyecto
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hero-anim d-5 w-full flex flex-col sm:flex-row items-center justify-between gap-5 pt-8">
+                    <div class="flex flex-wrap items-center justify-center gap-2">
+                        <span class="hero-pill">Miel 100% Pura</span>
+                        <span class="hero-pill">Cundinamarca</span>
+                        <span class="hero-pill">Prótesis 3D Gratuitas</span>
+                        <span class="hero-pill">PET Reciclado</span>
+                    </div>
+                    <button onclick="document.getElementById('view-splash').scrollIntoView({behavior:'smooth'})"
+                            class="animate-bob flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] font-semibold transition"
+                            style="color: #FDE68A;">
+                        Desliza para descubrir <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <main class="flex-grow pt-24">
 
+        <!-- ===== VISTA 1: SPLASH ===== -->
         <section id="view-splash" class="min-h-[85vh] flex flex-col items-center justify-center px-4 py-8 max-w-5xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center w-full">
-                
-                <!-- Presentación de la etiqueta física del producto - FIXED FOR ZERO CROPPING -->
-                <div class="lg:col-span-5 flex flex-col items-center text-center">
+
+                <div class="lg:col-span-5 flex flex-col items-center text-center reveal">
                     <div class="relative group max-w-sm w-full animate-float">
-                        <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-500 to-eco rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
-                        <div class="relative bg-stone-950 p-3 rounded-2xl border border-amber-500/30 shadow-2xl flex items-center justify-center overflow-hidden">
-                            <img id="label-image" 
-                                 src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/5.png" 
-                                 alt="Etiqueta Miel Ecopiensa" 
-                                 class="w-full h-auto object-contain max-h-[500px] rounded-xl transition duration-500 group-hover:scale-[1.02]" 
+                        <div class="absolute -inset-1.5 rounded-3xl blur opacity-50 group-hover:opacity-80 transition duration-1000"
+                             style="background: linear-gradient(135deg, #FCD34D, #10B981);"></div>
+                        <div class="relative p-3 rounded-2xl border-2 border-honey-500/30 shadow-2xl flex items-center justify-center overflow-hidden"
+                             style="background: linear-gradient(180deg, #FFFBF0, #FDF3DC);">
+                            <img id="label-image"
+                                 src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/5.png"
+                                 alt="Etiqueta Miel Ecopiensa"
+                                 class="w-full h-auto object-contain max-h-[500px] rounded-xl transition duration-500 group-hover:scale-[1.02]"
                                  onerror="this.src='5.png';">
                         </div>
                     </div>
-                    <p class="text-xs text-amber-400/70 mt-4 italic"><i class="fa-solid fa-qrcode mr-1.5"></i> Escaneado exitosamente del tarro de miel</p>
+                    <p class="text-xs mt-4 italic font-semibold" style="color: #B45309;">
+                        <i class="fa-solid fa-qrcode mr-1.5"></i> Escaneado exitosamente del tarro de miel
+                    </p>
                 </div>
 
-                <div class="lg:col-span-7 flex flex-col justify-center space-y-6 text-center lg:text-left px-2">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 self-center lg:self-start">
-                        <i class="fa-solid fa-leaf text-eco"></i> Proyecto Apícola y Social de la Fundación
+                <div class="lg:col-span-7 flex flex-col justify-center space-y-6 text-center lg:text-left px-2 reveal">
+                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold self-center lg:self-start"
+                          style="background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #78350F; border: 1px solid rgba(180,83,9,.25);">
+                        <i class="fa-solid fa-leaf" style="color: #047857;"></i> Proyecto Apícola y Social de la Fundación
                     </span>
-                    
-                    <h2 class="text-3xl sm:text-5xl font-serif text-white leading-tight">
+
+                    <h2 class="text-3xl sm:text-5xl font-serif leading-tight" style="color: #3D2817;">
                         Descubre la Magia de <br>
-                        <span class="bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-600 bg-clip-text text-transparent font-extrabold">Miel Ecopiensa</span>
+                        <span style="background: linear-gradient(135deg, #FBBF24 0%, #D97706 55%, #B45309 100%); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800;">Miel Ecopiensa</span>
                     </h2>
 
-                    <p class="text-stone-300 text-sm sm:text-base leading-relaxed">
-                        ¡Bienvenido! Al escanear el código de tu tarro, has ingresado al círculo de conservación de la <strong>Fundación Ecopiensa Evolution</strong>. Disfrutas de un producto 100% puro y natural, recolectado de colmenas rescatadas en Cundinamarca, cuyo beneficio financia directamente el programa de prótesis biónicas <strong>ECOBIÓNICA</strong>.
+                    <p class="text-sm sm:text-base leading-relaxed" style="color: #6B5239;">
+                        ¡Bienvenido! Al escanear el código de tu tarro, has ingresado al círculo de conservación de la <strong style="color: #78350F;">Fundación Ecopiensa Evolution</strong>. Disfrutas de un producto 100% puro y natural, recolectado de colmenas rescatadas en Cundinamarca, cuyo beneficio financia directamente el programa de prótesis biónicas <strong style="color: #047857;">ECOBIÓNICA</strong>.
                     </p>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                        <!-- OPCIÓN 1: Realidad Aumentada -->
-                        <button onclick="startAR()" class="group relative flex flex-col items-center justify-center p-6 rounded-2xl glass-premium border-2 border-amber-500/30 hover:border-amber-400 transition duration-300 shadow-xl hover:shadow-amber-500/10 text-center">
+                        <button onclick="startAR()" class="group relative flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-honey-500/40 hover:border-honey-500 transition duration-300 text-center"
+                                style="background: linear-gradient(180deg, #FFFFFF 0%, #FFFBF0 100%); box-shadow: 0 12px 30px -14px rgba(245,158,11,0.55);">
                             <div class="absolute top-3 right-3 flex h-3 w-3">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-honey-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-honey-500"></span>
                             </div>
-                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black text-2xl mb-3 shadow-inner group-hover:scale-110 transition duration-300 animate-pulse">
+                            <div class="w-14 h-14 rounded-full flex items-center justify-center text-ink text-2xl mb-3 shadow-inner group-hover:scale-110 transition duration-300 animate-pulse"
+                                 style="background: linear-gradient(135deg, #FCD34D, #D97706);">
                                 <i class="fa-solid fa-cube"></i>
                             </div>
-                            <h3 class="text-base font-bold text-amber-300 group-hover:text-amber-200">Realidad Aumentada</h3>
-                            <p class="text-xs text-stone-400 mt-1">Mira e interactúa con la abeja 3D flotando en tu espacio real</p>
+                            <h3 class="text-base font-extrabold" style="color: #92400E;">Realidad Aumentada</h3>
+                            <p class="text-xs mt-1" style="color: #8B6F47;">Mira e interactúa con la abeja 3D flotando en tu espacio real</p>
                         </button>
 
-                        <!-- OPCIÓN 2: Nuestro Producto e Impacto Social -->
-                        <button onclick="navigateTo('product-info')" class="group flex flex-col items-center justify-center p-6 rounded-2xl glass-eco border border-eco/30 hover:border-eco transition duration-300 shadow-xl hover:shadow-eco/10 text-center">
-                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-eco to-eco-dark flex items-center justify-center text-white text-2xl mb-3 shadow-inner group-hover:scale-110 transition duration-300">
+                        <button onclick="navigateTo('product-info')" class="group flex flex-col items-center justify-center p-6 rounded-2xl border-2 border-eco/30 hover:border-eco transition duration-300 text-center"
+                                style="background: linear-gradient(180deg, #FFFFFF 0%, #F0FDF4 100%); box-shadow: 0 12px 30px -14px rgba(16,185,129,0.5);">
+                            <div class="w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl mb-3 shadow-inner group-hover:scale-110 transition duration-300"
+                                 style="background: linear-gradient(135deg, #34D399, #047857);">
                                 <i class="fa-solid fa-hands-holding-child"></i>
                             </div>
-                            <h3 class="text-base font-bold text-eco-light group-hover:text-white font-serif">Producto & Fundación</h3>
-                            <p class="text-xs text-stone-400 mt-1">Conoce el origen, características y el proyecto de prótesis</p>
+                            <h3 class="text-base font-extrabold font-serif" style="color: #047857;">Producto & Fundación</h3>
+                            <p class="text-xs mt-1" style="color: #8B6F47;">Conoce el origen, características y el proyecto de prótesis</p>
                         </button>
                     </div>
 
-                    <div class="flex items-center justify-center lg:justify-start space-x-4 pt-6 border-t border-stone-800 text-xs text-stone-400">
-                        <p><strong>Fundación Ecopiensa Evolution</strong> <span class="text-stone-600">|</span> NIT 900998128-1</p>
+                    <div class="flex items-center justify-center lg:justify-start space-x-4 pt-6 text-xs" style="border-top: 1px solid rgba(180,83,9,.18); color: #8B6F47;">
+                        <p><strong style="color: #6B5239;">Fundación Ecopiensa Evolution</strong> <span style="color: #C4A57B;">|</span> NIT 900998128-1</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- ===== GALERÍA ===== -->
+            <div id="galeria" class="w-full pt-16 mt-16 scroll-mt-28" style="border-top: 1px solid rgba(180,83,9,.15);">
+                <div class="text-center max-w-2xl mx-auto mb-10 reveal">
+                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold"
+                          style="background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #78350F; border: 1px solid rgba(180,83,9,.25);">
+                        <i class="fa-solid fa-images"></i> Galería Ecopiensa
+                    </span>
+                    <h3 class="text-2xl sm:text-3xl font-serif mt-4" style="color: #3D2817;">Nuestro Producto en Imágenes</h3>
+                    <p class="text-xs sm:text-sm mt-3 leading-relaxed" style="color: #6B5239;">
+                        Un recorrido visual por la miel, las colmenas rescatadas y la producción sostenible de la
+                        Fundación Ecopiensa Evolution. Toca cualquier imagen para ampliarla.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                    <figure class="gallery-item reveal" onclick="openLightbox('Gemini_Generated_Image_2frm5v2frm5v2frm.jpeg','Producto de miel Ecopiensa')">
+                        <img src="Gemini_Generated_Image_2frm5v2frm5v2frm.jpeg" alt="Producto de miel Ecopiensa" loading="lazy">
+                        <figcaption>Producto de miel Ecopiensa</figcaption>
+                    </figure>
+
+                    <figure class="gallery-item reveal" style="transition-delay:.06s" onclick="openLightbox('Gemini_Generated_Image_h68947h68947h689.jpeg','Miel natural')">
+                        <img src="Gemini_Generated_Image_h68947h68947h689.jpeg" alt="Miel natural" loading="lazy">
+                        <figcaption>Miel natural</figcaption>
+                    </figure>
+
+                    <figure class="gallery-item reveal" style="transition-delay:.12s" onclick="openLightbox('Gemini_Generated_Image_hofm6dhofm6dhofm.jpeg','Presentación de miel')">
+                        <img src="Gemini_Generated_Image_hofm6dhofm6dhofm.jpeg" alt="Presentación de miel" loading="lazy">
+                        <figcaption>Presentación de miel</figcaption>
+                    </figure>
+
+                    <figure class="gallery-item reveal" style="transition-delay:.18s" onclick="openLightbox('Gemini_Generated_Image_kn84yqkn84yqkn84.jpeg','Producto apícola')">
+                        <img src="Gemini_Generated_Image_kn84yqkn84yqkn84.jpeg" alt="Producto apícola" loading="lazy">
+                        <figcaption>Producto apícola</figcaption>
+                    </figure>
+
+                    <figure class="gallery-item reveal" style="transition-delay:.06s" onclick="openLightbox('Gemini_Generated_Image_m4aczbm4aczbm4ac.jpeg','Miel Ecopiensa')">
+                        <img src="Gemini_Generated_Image_m4aczbm4aczbm4ac.jpeg" alt="Miel Ecopiensa" loading="lazy">
+                        <figcaption>Miel Ecopiensa</figcaption>
+                    </figure>
+
+                    <figure class="gallery-item reveal" style="transition-delay:.12s" onclick="openLightbox('Gemini_Generated_Image_mkn6g7mkn6g7mkn6.jpeg','Miel artesanal')">
+                        <img src="Gemini_Generated_Image_mkn6g7mkn6g7mkn6.jpeg" alt="Miel artesanal" loading="lazy">
+                        <figcaption>Miel artesanal</figcaption>
+                    </figure>
+
+                    <figure class="gallery-item reveal" style="transition-delay:.18s" onclick="openLightbox('Gemini_Generated_Image_nkajfjnkajfjnkaj.jpeg','Producción sostenible')">
+                        <img src="Gemini_Generated_Image_nkajfjnkajfjnkaj.jpeg" alt="Producción sostenible" loading="lazy">
+                        <figcaption>Producción sostenible</figcaption>
+                    </figure>
+
+                    <figure class="gallery-item reveal" style="transition-delay:.24s" onclick="openLightbox('Gemini_Generated_Image_nttfqrnttfqrnttf.jpeg','Ecopiensa')">
+                        <img src="Gemini_Generated_Image_nttfqrnttfqrnttf.jpeg" alt="Ecopiensa" loading="lazy">
+                        <figcaption>Ecopiensa</figcaption>
+                    </figure>
                 </div>
             </div>
         </section>
 
-        <!-- VISTA 2: Pantalla de Realidad Aumentada (Simulador y Cámara real sobrepuesta) -->
+        <!-- ===== VISTA 2: AR (SE MANTIENE OSCURA) ===== -->
         <section id="view-ar" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between overflow-hidden">
-            
-            <!-- Real-time viewport camera stream & ThreeJS output handled by MindAR -->
+
             <div id="canvas-container" class="absolute inset-0 z-10 cursor-pointer"></div>
 
-            <!-- Header HUD inside AR Mode -->
-            <div class="relative z-20 w-full p-4 glass-premium flex items-center justify-between border-b border-white/5">
+            <div class="relative z-20 w-full p-4 glass-premium flex items-center justify-between border-b border-white/5" style="background: rgba(61,40,23,0.92); backdrop-filter: blur(14px);">
                 <div class="flex items-center space-x-3">
                     <img id="ar-header-logo"
-                         src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png" 
-                         alt="Logo" 
-                         class="h-8 w-8 rounded-full bg-black/50 border border-eco" 
+                         src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png"
+                         alt="Logo"
+                         class="h-8 w-8 rounded-full bg-black/50 border border-eco"
                          onerror="handleLogoError(this)">
                     <div>
                         <div class="flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                            <h3 class="text-xs font-bold tracking-wider text-amber-400">AR BEE-SANTUARIO</h3>
+                            <h3 class="text-xs font-bold tracking-wider" style="color:#FCD34D;">AR BEE-SANTUARIO</h3>
                         </div>
                         <p class="text-[9px] text-stone-300">Modo Interactivo</p>
                     </div>
@@ -240,16 +610,14 @@
                 </button>
             </div>
 
-            <!-- Active Computer Vision Scanning HUD overlays - Con transiciones de opacidad para ocultarse limpiamente -->
             <div id="ar-scanner-hud" class="absolute inset-0 z-15 pointer-events-none flex flex-col justify-center items-center transition-all duration-500">
-                
-                <!-- Target Reticle Overlay -->
+
                 <div id="scan-reticle" class="w-64 h-64 border-2 border-dashed border-red-500/40 rounded-3xl relative flex items-center justify-center animate-pulse-scan transition-all duration-300">
                     <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-red-500 rounded-tl-xl"></div>
                     <div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-red-500 rounded-tr-xl"></div>
                     <div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-red-500 rounded-bl-xl"></div>
                     <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-red-500 rounded-br-xl"></div>
-                    
+
                     <div class="text-center p-4">
                         <p id="scan-status-text" class="text-xs text-red-400 font-bold tracking-wider uppercase drop-shadow">Buscando Etiqueta...</p>
                         <div id="scan-bar-container" class="w-24 h-1.5 bg-stone-900/80 rounded-full mt-2 mx-auto overflow-hidden">
@@ -258,20 +626,17 @@
                     </div>
                 </div>
 
-                <!-- Guidance tooltip -->
                 <div class="mt-8 bg-black/80 backdrop-blur border border-white/15 px-4 py-2 rounded-xl text-center max-w-xs">
                     <p class="text-[11px] text-stone-300">Apunta la cámara a la imagen del tarro de miel para proyectar la abeja.</p>
                     <div class="flex items-center justify-center gap-2 mt-1.5">
                         <img src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/5.png" alt="Target Ref" class="w-8 h-10 object-contain rounded border border-white/10">
-                        <span class="text-[10px] text-amber-400">Patrón de escaneo activo</span>
+                        <span class="text-[10px]" style="color:#FCD34D;">Patrón de escaneo activo</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Navigation HUD inside AR Mode -->
             <div class="relative z-20 w-full p-4 flex flex-col items-center space-y-4 pb-8 pointer-events-none">
-                
-                <!-- Hand recognition status bar -->
+
                 <div class="bg-black/90 backdrop-blur border border-emerald-500/30 px-5 py-2 rounded-full text-xs text-stone-200 flex items-center gap-2.5 shadow-2xl animate-pulse">
                     <span class="relative flex h-2 w-2">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -280,150 +645,162 @@
                     <span id="hand-status-text" class="font-semibold text-[10px] tracking-wide uppercase">IA de Posado en Mano Activa</span>
                 </div>
 
-                <!-- Dynamic touch target feedback block -->
-                <div class="glass-premium border border-amber-400/40 px-5 py-3 rounded-2xl max-w-sm text-center shadow-2xl animate-bounce pointer-events-auto">
-                    <p class="text-xs text-amber-300 font-bold flex items-center justify-center gap-1.5">
+                <div class="border px-5 py-3 rounded-2xl max-w-sm text-center shadow-2xl animate-bounce pointer-events-auto"
+                     style="background: rgba(61,40,23,0.92); border-color: rgba(252,211,77,0.5); backdrop-filter: blur(12px);">
+                    <p class="text-xs font-bold flex items-center justify-center gap-1.5" style="color:#FCD34D;">
                         <span>🐝</span> ¡Pon tu mano o mantén presionado!
                     </p>
                     <p class="text-[10px] text-stone-300 mt-1">La abeja tricolor detectará tu mano y volará para posarse en ella emitiendo un ronroneo biomecánico de felicidad.</p>
                 </div>
 
-                <!-- Live capture metrics hud -->
                 <div class="flex items-center space-x-4 bg-black/90 backdrop-blur border border-white/10 px-5 py-2 rounded-full text-xs pointer-events-auto">
-                    <span class="text-stone-300"><i class="fa-solid fa-hand-pointer text-amber-400 mr-1.5"></i> Toques: <strong id="ar-score" class="text-amber-400 text-sm">0</strong></span>
+                    <span class="text-stone-300"><i class="fa-solid fa-hand-pointer mr-1.5" style="color:#FCD34D;"></i> Toques: <strong id="ar-score" class="text-sm" style="color:#FCD34D;">0</strong></span>
                     <span class="text-stone-600">|</span>
-                    <span class="text-eco-light"><i class="fa-solid fa-shield-heart mr-1.5"></i> Proyecto Social Activo</span>
+                    <span style="color:#6EE7B7;"><i class="fa-solid fa-shield-heart mr-1.5"></i> Proyecto Social Activo</span>
                 </div>
 
-                <!-- Navigation bridge button -->
-                <button onclick="stopAR(); navigateTo('product-info')" id="ar-continue-btn" class="w-full max-w-sm py-3.5 bg-gradient-to-r from-amber-500 via-yellow-500 to-eco text-black font-extrabold text-sm rounded-full shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 pointer-events-auto">
+                <button onclick="stopAR(); navigateTo('product-info')" id="ar-continue-btn" class="btn-honey w-full max-w-sm py-3.5 text-sm rounded-full flex items-center justify-center gap-2 pointer-events-auto">
                     <span>Ver Nuestro Producto e Impacto</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </section>
 
-        <!-- VISTA 3: Ficha Técnica, Propuesta Social Ecobiónica y Simulador Financiero -->
+        <!-- ===== VISTA 3: INFO PRODUCTO ===== -->
         <section id="view-product-info" class="hidden min-h-screen px-4 pb-20 max-w-6xl mx-auto space-y-24">
-            
-            <!-- Bloque 1: Atributos de Pureza e Historia de Reskate Apícola -->
+
+            <!-- BLOQUE 1 -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-8">
-                <div class="space-y-6">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <div class="space-y-6 reveal">
+                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold"
+                          style="background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #78350F; border: 1px solid rgba(180,83,9,.25);">
                         <i class="fa-solid fa-certificate"></i> Origen y Pureza Científica
                     </span>
-                    <h2 class="text-3xl sm:text-4xl font-serif text-white">
+                    <h2 class="text-3xl sm:text-4xl font-serif" style="color: #3D2817;">
                         La Miel Pura de Cundinamarca y su Misión de Conservación
                     </h2>
-                    <p class="text-stone-300 text-sm sm:text-base leading-relaxed">
-                        Nuestra miel de abejas premium proviene en su totalidad de reservas ecológicas protegidas en el departamento de <strong class="text-amber-400">Cundinamarca</strong>. No es solo un endulzante excepcional, es el pilar de un riguroso esfuerzo de <strong>rescate y reubicación ambiental</strong>.
+                    <p class="text-sm sm:text-base leading-relaxed" style="color: #6B5239;">
+                        Nuestra miel de abejas premium proviene en su totalidad de reservas ecológicas protegidas en el departamento de <strong style="color:#B45309;">Cundinamarca</strong>. No es solo un endulzante excepcional, es el pilar de un riguroso esfuerzo de <strong>rescate y reubicación ambiental</strong>.
                     </p>
-                    
-                    <div class="p-4 rounded-xl glass-premium border-l-4 border-amber-500 text-xs text-stone-300 leading-relaxed">
-                        <p class="font-bold text-amber-300 mb-1">🐝 Traslado de Colmenas Metropolitanas</p>
+
+                    <div class="p-4 rounded-xl text-xs leading-relaxed"
+                         style="background: linear-gradient(135deg, #FFFBEB, #FEF3C7); border-left: 4px solid #F59E0B; color: #6B5239; box-shadow: 0 6px 20px -12px rgba(245,158,11,.5);">
+                        <p class="font-extrabold mb-1" style="color:#92400E;">🐝 Traslado de Colmenas Metropolitanas</p>
                         Abejas en riesgo inminente dentro de la ciudad de Bogotá son cuidadosamente rescatadas y transportadas por personal especializado a reservas andinas de la sabana, donde polinizan especies nativas y generan miel 100% pura, libre de agroquímicos y polución citadina.
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 text-xs">
-                        <div class="bg-stone-900/60 p-4 rounded-xl border border-stone-800">
-                            <h4 class="text-amber-400 font-bold mb-1"><i class="fa-solid fa-flask"></i> 100% Pura y Cruda</h4>
-                            <p class="text-stone-400">Sin pasteurizar, sin jarabes de azúcar añadidos ni conservantes químicos.</p>
+                        <div class="card-warm p-4">
+                            <h4 class="font-extrabold mb-1" style="color:#B45309;"><i class="fa-solid fa-flask"></i> 100% Pura y Cruda</h4>
+                            <p style="color: #8B6F47;">Sin pasteurizar, sin jarabes de azúcar añadidos ni conservantes químicos.</p>
                         </div>
-                        <div class="bg-stone-900/60 p-4 rounded-xl border border-stone-800">
-                            <h4 class="text-eco-light font-bold mb-1"><i class="fa-solid fa-tree"></i> Biodiversidad Andina</h4>
-                            <p class="text-stone-400">Polen floral recolectado en áreas forestales protegidas de altura.</p>
+                        <div class="card-warm p-4">
+                            <h4 class="font-extrabold mb-1" style="color:#047857;"><i class="fa-solid fa-tree"></i> Biodiversidad Andina</h4>
+                            <p style="color: #8B6F47;">Polen floral recolectado en áreas forestales protegidas de altura.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Imagen del tarro/etiqueta y soporte científico -->
-                <div class="relative flex justify-center">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-amber-500 to-yellow-600 rounded-3xl blur opacity-20"></div>
-                    <div class="relative bg-stone-950 p-6 rounded-2xl border border-amber-500/20 max-w-md w-full shadow-2xl">
-                        <h3 class="font-serif text-xl text-amber-400 mb-4 flex items-center justify-between">
+                <div class="relative flex flex-col items-center gap-6 w-full reveal">
+                    <div class="card-warm p-6 max-w-md w-full">
+                        <h3 class="font-serif text-xl mb-4 flex items-center justify-between" style="color:#B45309;">
                             <span>Sello de Pureza</span>
-                            <i class="fa-solid fa-shield-halved text-eco-light"></i>
+                            <i class="fa-solid fa-shield-halved" style="color:#047857;"></i>
                         </h3>
-                        <ul class="space-y-4 text-xs text-stone-300">
+                        <ul class="space-y-4 text-xs" style="color: #6B5239;">
                             <li class="flex items-start gap-3">
-                                <i class="fa-solid fa-circle-check text-eco-light mt-0.5"></i>
-                                <span><strong>Estudios e Investigaciones:</strong> Análisis fisicoquímicos respaldan su pureza, densidad y alto porcentaje de antioxidantes y nutrientes bio-activos.</span>
+                                <i class="fa-solid fa-circle-check mt-0.5" style="color:#10B981;"></i>
+                                <span><strong style="color:#78350F;">Estudios e Investigaciones:</strong> Análisis fisicoquímicos respaldan su pureza, densidad y alto porcentaje de antioxidantes y nutrientes bio-activos.</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <i class="fa-solid fa-circle-check text-eco-light mt-0.5"></i>
-                                <span><strong>Sostenible:</strong> La compra de cada frasco financia los insumos de rescate (trajes, cajas de colmena, transporte) para la conservación de la biodiversidad local.</span>
+                                <i class="fa-solid fa-circle-check mt-0.5" style="color:#10B981;"></i>
+                                <span><strong style="color:#78350F;">Sostenible:</strong> La compra de cada frasco financia los insumos de rescate (trajes, cajas de colmena, transporte) para la conservación de la biodiversidad local.</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <i class="fa-solid fa-circle-check text-eco-light mt-0.5"></i>
-                                <span><strong>Comunidad Transparente:</strong> Puedes monitorear nuestras jornadas de rescate directamente en nuestro <a href="https://www.facebook.com/FundacionEecopiensaEvolution" target="_blank" class="text-amber-400 underline font-semibold hover:text-amber-300">Facebook oficial</a>.</span>
+                                <i class="fa-solid fa-circle-check mt-0.5" style="color:#10B981;"></i>
+                                <span><strong style="color:#78350F;">Comunidad Transparente:</strong> Puedes monitorear nuestras jornadas de rescate directamente en nuestro <a href="https://www.facebook.com/FundacionEecopiensaEvolution" target="_blank" class="underline font-semibold hover:opacity-80" style="color:#B45309;">Facebook oficial</a>.</span>
                             </li>
                         </ul>
-                        <div class="mt-6 border-t border-stone-800 pt-4 flex items-center justify-between">
+                        <div class="mt-6 pt-4 flex items-center justify-between" style="border-top: 1px solid rgba(180,83,9,.15);">
                             <img id="card-logo-badge"
-                                 src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png" 
-                                 alt="Logo Ecopiensa" 
-                                 class="h-9 w-9 object-contain rounded-full bg-black border border-eco" 
+                                 src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png"
+                                 alt="Logo Ecopiensa"
+                                 class="h-9 w-9 object-contain rounded-full border border-eco"
+                                 style="background: linear-gradient(135deg,#FEF3C7,#FDE68A);"
                                  onerror="handleLogoError(this)">
-                            <span class="text-[10px] text-stone-500">Miel Ecopiensa Premium</span>
+                            <span class="text-[10px]" style="color:#A88B6A;">Miel Ecopiensa Premium</span>
                         </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 w-full max-w-md">
+                        <figure class="gallery-item" onclick="openLightbox('Gemini_Generated_Image_hofm6dhofm6dhofm.jpeg','Presentación de miel')">
+                            <img src="Gemini_Generated_Image_hofm6dhofm6dhofm.jpeg" alt="Presentación de miel" loading="lazy">
+                        </figure>
+                        <figure class="gallery-item" onclick="openLightbox('Gemini_Generated_Image_mkn6g7mkn6g7mkn6.jpeg','Miel artesanal')">
+                            <img src="Gemini_Generated_Image_mkn6g7mkn6g7mkn6.jpeg" alt="Miel artesanal" loading="lazy">
+                        </figure>
+                        <figure class="gallery-item" onclick="openLightbox('Gemini_Generated_Image_nkajfjnkajfjnkaj.jpeg','Producción sostenible')">
+                            <img src="Gemini_Generated_Image_nkajfjnkajfjnkaj.jpeg" alt="Producción sostenible" loading="lazy">
+                        </figure>
                     </div>
                 </div>
             </div>
 
-            <!-- Bloque 2: Proyecto ECOBIÓNICA (Estructura oficial del documento docx) -->
-            <div id="ecobionica" class="pt-12 border-t border-stone-900">
-                <div class="text-center max-w-3xl mx-auto space-y-6 mb-16">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-eco/10 text-eco-light border border-eco/20">
+            <!-- BLOQUE 2: ECOBIÓNICA -->
+            <div id="ecobionica" class="pt-12 scroll-mt-28" style="border-top: 1px solid rgba(180,83,9,.18);">
+                <div class="text-center max-w-3xl mx-auto space-y-6 mb-16 reveal">
+                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold"
+                          style="background: linear-gradient(135deg, #D1FAE5, #A7F3D0); color: #065F46; border: 1px solid rgba(16,185,129,.3);">
                         <i class="fa-solid fa-hand-holding-heart"></i> Compromiso de Ingeniería Social
                     </span>
-                    
-                    <!-- Official Ecobiónica Program Logo Header - Beautifully Framed -->
+
                     <div class="flex flex-col items-center justify-center space-y-3">
-                        <img id="logo-ecobionica-main" 
-                             src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecobionica%20con%20trasparencia.png" 
-                             alt="Logo Ecobiónica" 
-                             class="max-w-md w-11/12 h-auto object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-                             onerror="handleEcobionicaError(this)">
-                        <p class="text-stone-300 text-sm sm:text-base italic max-w-xl">
-                            “Damos Movilidad A Tu Vida, Con La Recuperación De Materiales Reciclables.”
+                        <div class="relative">
+                            <div class="absolute inset-0 blur-2xl opacity-60" style="background: radial-gradient(ellipse, rgba(16,185,129,.5), transparent 70%);"></div>
+                            <img id="logo-ecobionica-main"
+                                 src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecobionica%20con%20trasparencia.png"
+                                 alt="Logo Ecobiónica"
+                                 class="relative max-w-md w-11/12 h-auto object-contain"
+                                 onerror="handleEcobionicaError(this)">
+                        </div>
+                        <p class="text-sm sm:text-base italic max-w-xl" style="color: #6B5239;">
+                            "Damos Movilidad A Tu Vida, Con La Recuperación De Materiales Reciclables."
                         </p>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                    
-                    <!-- Información de Identidad de la Fundación y Origen del programa -->
-                    <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
+
+                    <div class="lg:col-span-7 flex flex-col justify-between space-y-6 reveal">
                         <div class="space-y-4">
-                            <h3 class="text-xl font-bold text-eco-light flex items-center gap-2">
+                            <h3 class="text-xl font-extrabold flex items-center gap-2" style="color:#047857;">
                                 <i class="fa-solid fa-gears"></i> Origen y Propósito de la Obra
                             </h3>
-                            <p class="text-stone-300 text-sm leading-relaxed">
-                                El programa **ECOBIÓNICA** es liderado por la <strong>Fundación Ecopiensa Evolution</strong> (NIT 900998128-1). Nace a partir de brigadas de salud conjuntas con el Ejército Nacional y la Policía Nacional en zonas rurales del territorio nacional. 
+                            <p class="text-sm leading-relaxed" style="color: #6B5239;">
+                                El programa **ECOBIÓNICA** es liderado por la <strong style="color:#78350F;">Fundación Ecopiensa Evolution</strong> (NIT 900998128-1). Nace a partir de brigadas de salud conjuntas con el Ejército Nacional y la Policía Nacional en zonas rurales del territorio nacional.
                             </p>
-                            <p class="text-stone-300 text-sm leading-relaxed">
+                            <p class="text-sm leading-relaxed" style="color: #6B5239;">
                                 Al percatarse de las enormes esperas (a veces de años) y altos costos económicos que sufren campesinos vulnerables, militares heridos y personas de escaso presupuesto para acceder a prótesis médicas, decidimos innovar: **diseñar, modelar y fabricar prótesis totalmente gratuitas mediante impresión 3D**, empleando filamento termoplástico **PET reciclado**, obtenido del aprovechamiento de botellas plásticas descartadas.
                             </p>
                         </div>
 
-                        <!-- Tarjetas de Alcance y Servicio del Programa -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                            <div class="glass-eco p-5 rounded-xl border border-eco/20 flex flex-col justify-between">
+                            <div class="glass-eco p-5 rounded-xl flex flex-col justify-between">
                                 <div>
-                                    <span class="text-eco-light font-bold text-sm block mb-1 flex items-center gap-1.5">
+                                    <span class="font-extrabold text-sm block mb-1 flex items-center gap-1.5" style="color:#047857;">
                                         <i class="fa-solid fa-user-injured"></i> Prótesis Humanas
                                     </span>
-                                    <p class="text-stone-400 text-xs">
+                                    <p class="text-xs" style="color: #6B5239;">
                                         Diseño personalizado de miembros superiores (manos, dedos, extremidades mecánicas completas), inferiores (prótesis desde articulación de rodilla, pie, tobillo) y soportes funcionales de exoesqueleto.
                                     </p>
                                 </div>
                             </div>
-                            <div class="glass-eco p-5 rounded-xl border border-eco/20 flex flex-col justify-between">
+                            <div class="glass-eco p-5 rounded-xl flex flex-col justify-between">
                                 <div>
-                                    <span class="text-amber-400 font-bold text-sm block mb-1 flex items-center gap-1.5">
+                                    <span class="font-extrabold text-sm block mb-1 flex items-center gap-1.5" style="color:#B45309;">
                                         <i class="fa-solid fa-paw"></i> Prótesis de Mascotas
                                     </span>
-                                    <p class="text-stone-400 text-xs">
+                                    <p class="text-xs" style="color: #6B5239;">
                                         Diseñamos dispositivos ortopédicos articulados y carritos de soporte adaptados a la morfología de perros, gatos y otras especies que han sufrido amputación o problemas motrices congénitos.
                                     </p>
                                 </div>
@@ -431,226 +808,237 @@
                         </div>
                     </div>
 
-                    <!-- Fases Técnicas y Mapa de Procesos de Reciclaje a Prótesis -->
-                    <div class="lg:col-span-5 bg-stone-900/40 p-6 rounded-2xl border border-stone-800/80 flex flex-col justify-between shadow-xl">
+                    <div class="lg:col-span-5 p-6 rounded-2xl flex flex-col justify-between reveal"
+                         style="background: linear-gradient(180deg, #FFFBEB 0%, #FEF3C7 100%); border: 1px solid rgba(245,158,11,.28); box-shadow: 0 10px 30px -18px rgba(180,83,9,.5);">
                         <div>
-                            <h4 class="text-stone-300 font-bold text-xs mb-4 uppercase tracking-wider flex items-center justify-between">
+                            <h4 class="font-extrabold text-xs mb-4 uppercase tracking-wider flex items-center justify-between" style="color:#78350F;">
                                 <span>Mapa de Procesos Ecobiónica</span>
-                                <i class="fa-solid fa-recycle text-eco-light animate-spin" style="animation-duration: 8s;"></i>
+                                <i class="fa-solid fa-recycle animate-spin" style="color:#047857; animation-duration: 8s;"></i>
                             </h4>
-                            
-                            <!-- Lista secuencial de proceso basada en el mapa oficial -->
+
                             <div class="space-y-3 text-xs">
                                 <div class="flex items-start gap-3">
-                                    <span class="w-5 h-5 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">1</span>
+                                    <span class="w-5 h-5 rounded-full flex items-center justify-center font-extrabold text-[10px] text-white flex-shrink-0" style="background: linear-gradient(135deg,#10B981,#047857);">1</span>
                                     <div>
-                                        <p class="font-bold text-white">Donación de Reciclaje / Compra de Miel</p>
-                                        <p class="text-stone-400 text-[11px]">Tú compras miel o aliados donan material reciclable.</p>
+                                        <p class="font-extrabold" style="color:#3D2817;">Donación de Reciclaje / Compra de Miel</p>
+                                        <p class="text-[11px]" style="color: #8B6F47;">Tú compras miel o aliados donan material reciclable.</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
-                                    <span class="w-5 h-5 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">2</span>
+                                    <span class="w-5 h-5 rounded-full flex items-center justify-center font-extrabold text-[10px] text-white flex-shrink-0" style="background: linear-gradient(135deg,#10B981,#047857);">2</span>
                                     <div>
-                                        <p class="font-bold text-white">Recolección, Clasificación e industrialización (E.C.A.)</p>
-                                        <p class="text-stone-400 text-[11px]">La Estación de Clasificación de la Fundación procesa el PET.</p>
+                                        <p class="font-extrabold" style="color:#3D2817;">Recolección, Clasificación e industrialización (E.C.A.)</p>
+                                        <p class="text-[11px]" style="color: #8B6F47;">La Estación de Clasificación de la Fundación procesa el PET.</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
-                                    <span class="w-5 h-5 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">3</span>
+                                    <span class="w-5 h-5 rounded-full flex items-center justify-center font-extrabold text-[10px] text-white flex-shrink-0" style="background: linear-gradient(135deg,#10B981,#047857);">3</span>
                                     <div>
-                                        <p class="font-bold text-white">Transformación & Extrusión 3D</p>
-                                        <p class="text-stone-400 text-[11px]">Conversión física de botellas a filamentos de alta resistencia.</p>
+                                        <p class="font-extrabold" style="color:#3D2817;">Transformación & Extrusión 3D</p>
+                                        <p class="text-[11px]" style="color: #8B6F47;">Conversión física de botellas a filamentos de alta resistencia.</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
-                                    <span class="w-5 h-5 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">4</span>
+                                    <span class="w-5 h-5 rounded-full flex items-center justify-center font-extrabold text-[10px] text-white flex-shrink-0" style="background: linear-gradient(135deg,#10B981,#047857);">4</span>
                                     <div>
-                                        <p class="font-bold text-white">Estudio, Modelado y Construcción</p>
-                                        <p class="text-stone-400 text-[11px]">Escaneo corporal 3D y manufactura a la medida del beneficiario.</p>
+                                        <p class="font-extrabold" style="color:#3D2817;">Estudio, Modelado y Construcción</p>
+                                        <p class="text-[11px]" style="color: #8B6F47;">Escaneo corporal 3D y manufactura a la medida del beneficiario.</p>
                                     </div>
                                 </div>
                                 <div class="flex items-start gap-3">
-                                    <span class="w-5 h-5 rounded-full bg-eco-dark text-eco-light flex items-center justify-center font-bold text-[10px]">5</span>
+                                    <span class="w-5 h-5 rounded-full flex items-center justify-center font-extrabold text-[10px] text-white flex-shrink-0" style="background: linear-gradient(135deg,#10B981,#047857);">5</span>
                                     <div>
-                                        <p class="font-bold text-white">Entrega Gratuita al Beneficiario</p>
-                                        <p class="text-stone-400 text-[11px]">Instalación, soporte técnico y adaptación motriz.</p>
+                                        <p class="font-extrabold" style="color:#3D2817;">Entrega Gratuita al Beneficiario</p>
+                                        <p class="text-[11px]" style="color: #8B6F47;">Instalación, soporte técnico y adaptación motriz.</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-10">
+                    <figure class="gallery-item reveal" onclick="openLightbox('Gemini_Generated_Image_2frm5v2frm5v2frm.jpeg','Producto de miel Ecopiensa')">
+                        <img src="Gemini_Generated_Image_2frm5v2frm5v2frm.jpeg" alt="Producto de miel Ecopiensa" loading="lazy">
+                    </figure>
+                    <figure class="gallery-item reveal" style="transition-delay:.06s" onclick="openLightbox('Gemini_Generated_Image_h68947h68947h689.jpeg','Miel natural')">
+                        <img src="Gemini_Generated_Image_h68947h68947h689.jpeg" alt="Miel natural" loading="lazy">
+                    </figure>
+                    <figure class="gallery-item reveal" style="transition-delay:.12s" onclick="openLightbox('Gemini_Generated_Image_kn84yqkn84yqkn84.jpeg','Producto apícola')">
+                        <img src="Gemini_Generated_Image_kn84yqkn84yqkn84.jpeg" alt="Producto apícola" loading="lazy">
+                    </figure>
+                    <figure class="gallery-item reveal" style="transition-delay:.18s" onclick="openLightbox('Gemini_Generated_Image_nttfqrnttfqrnttf.jpeg','Ecopiensa')">
+                        <img src="Gemini_Generated_Image_nttfqrnttfqrnttf.jpeg" alt="Ecopiensa" loading="lazy">
+                    </figure>
+                </div>
             </div>
 
-            <!-- Bloque 3: Líneas Académicas e Investigación Biónica -->
-            <div class="pt-12 border-t border-stone-900">
-                <div class="space-y-4 max-w-3xl mb-10">
-                    <h3 class="text-2xl font-serif text-white">Líneas de Investigación y Capacitación Ambiental</h3>
-                    <p class="text-xs text-stone-400">
+            <!-- BLOQUE 3 -->
+            <div class="pt-12" style="border-top: 1px solid rgba(180,83,9,.18);">
+                <div class="space-y-4 max-w-3xl mb-10 reveal">
+                    <h3 class="text-2xl font-serif" style="color:#3D2817;">Líneas de Investigación y Capacitación Ambiental</h3>
+                    <p class="text-xs" style="color: #6B5239;">
                         Creamos modelos académicos de enseñanza, semilleros corporativos y temarios listos para integrarse como electivas en universidades, centros de desarrollo tecnológico e instituciones aliadas:
                     </p>
                 </div>
-                
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
-                        <span class="text-amber-500 font-bold block mb-1">Diseño Paramétrico 3D</span>
-                        <p class="text-stone-400 text-[11px]">Modelado avanzado de estructuras en Autodesk Fusion 360 optimizadas para impresión.</p>
+                    <div class="card-warm p-4 reveal">
+                        <span class="font-extrabold block mb-1" style="color:#B45309;">Diseño Paramétrico 3D</span>
+                        <p class="text-[11px]" style="color: #6B5239;">Modelado avanzado de estructuras en Autodesk Fusion 360 optimizadas para impresión.</p>
                     </div>
-                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
-                        <span class="text-amber-500 font-bold block mb-1">Construcción de Falanges Biomecánicas</span>
-                        <p class="text-stone-400 text-[11px]">Análisis de esfuerzos mecánicos y ensamble modular de dedos y articulaciones.</p>
+                    <div class="card-warm p-4 reveal" style="transition-delay:.05s">
+                        <span class="font-extrabold block mb-1" style="color:#B45309;">Construcción de Falanges Biomecánicas</span>
+                        <p class="text-[11px]" style="color: #6B5239;">Análisis de esfuerzos mecánicos y ensamble modular de dedos y articulaciones.</p>
                     </div>
-                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
-                        <span class="text-amber-500 font-bold block mb-1">Sensores para Señales Biológicas</span>
-                        <p class="text-stone-400 text-[11px]">Design de circuitería electromiográfica para la lectura de impulsos musculares.</p>
+                    <div class="card-warm p-4 reveal" style="transition-delay:.1s">
+                        <span class="font-extrabold block mb-1" style="color:#B45309;">Sensores para Señales Biológicas</span>
+                        <p class="text-[11px]" style="color: #6B5239;">Design de circuitería electromiográfica para la lectura de impulsos musculares.</p>
                     </div>
-                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
-                        <span class="text-eco-light font-bold block mb-1">Férulas 3D Avanzadas</span>
-                        <p class="text-stone-400 text-[11px]">Estructuras de inmovilización ventiladas y ligeras para rehabilitation traumatológica.</p>
+                    <div class="card-warm p-4 reveal" style="transition-delay:.15s">
+                        <span class="font-extrabold block mb-1" style="color:#047857;">Férulas 3D Avanzadas</span>
+                        <p class="text-[11px]" style="color: #6B5239;">Estructuras de inmovilización ventiladas y ligeras para rehabilitation traumatológica.</p>
                     </div>
-                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
-                        <span class="text-eco-light font-bold block mb-1">Bio-Gripper Flexible</span>
-                        <p class="text-stone-400 text-[11px]">Pinzas robóticas inspiradas en anatomía orgánica para manipulación suave.</p>
+                    <div class="card-warm p-4 reveal" style="transition-delay:.2s">
+                        <span class="font-extrabold block mb-1" style="color:#047857;">Bio-Gripper Flexible</span>
+                        <p class="text-[11px]" style="color: #6B5239;">Pinzas robóticas inspiradas en anatomía orgánica para manipulación suave.</p>
                     </div>
-                    <div class="p-4 bg-stone-900/30 rounded-xl border border-stone-800">
-                        <span class="text-eco-light font-bold block mb-1">Dispositivos Ortopédicos para Mascotas</span>
-                        <p class="text-stone-400 text-[11px]">Adaptación de chasis biomecánicos y carritos de arrastre ligeros.</p>
+                    <div class="card-warm p-4 reveal" style="transition-delay:.25s">
+                        <span class="font-extrabold block mb-1" style="color:#047857;">Dispositivos Ortopédicos para Mascotas</span>
+                        <p class="text-[11px]" style="color: #6B5239;">Adaptación de chasis biomecánicos y carritos de arrastre ligeros.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Bloque 4: Alianzas Corporativas y Calculadora Interactiva de Metas -->
-            <div class="pt-12 border-t border-stone-900 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                
-                <!-- Beneficios de Alianza -->
-                <div class="lg:col-span-6 space-y-6">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-eco/10 text-eco-light border border-eco/20">
+            <!-- BLOQUE 4 -->
+            <div class="pt-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center" style="border-top: 1px solid rgba(180,83,9,.18);">
+
+                <div class="lg:col-span-6 space-y-6 reveal">
+                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold"
+                          style="background: linear-gradient(135deg, #D1FAE5, #A7F3D0); color: #065F46; border: 1px solid rgba(16,185,129,.3);">
                         <i class="fa-solid fa-handshake"></i> Beneficios para Aliados Corporativos
                     </span>
-                    <h3 class="text-2xl sm:text-3xl font-serif text-white">
+                    <h3 class="text-2xl sm:text-3xl font-serif" style="color:#3D2817;">
                         ¿Cómo puede unirse tu Empresa o Institución?
                     </h3>
-                    <p class="text-stone-300 text-xs sm:text-sm leading-relaxed">
+                    <p class="text-xs sm:text-sm leading-relaxed" style="color: #6B5239;">
                         Buscamos alianzas para financiar y equipar nuestro taller (impresoras de alta velocidad de 400 mm/s, extrusoras de filamento, computadores de modelado y escáneres 3D manuales).
                     </p>
 
                     <div class="space-y-3.5 text-xs">
-                        <div class="bg-stone-900/50 p-3.5 rounded-xl border border-stone-800 flex items-center justify-between">
-                            <span class="flex items-center gap-2"><i class="fa-solid fa-award text-amber-500"></i> Certificado de Responsabilidad Social</span>
-                            <span class="text-[9px] bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded">Expedido</span>
+                        <div class="card-warm p-3.5 flex items-center justify-between">
+                            <span class="flex items-center gap-2 font-semibold" style="color:#3D2817;"><i class="fa-solid fa-award" style="color:#D97706;"></i> Certificado de Responsabilidad Social</span>
+                            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold" style="background:#FEF3C7; color:#92400E;">Expedido</span>
                         </div>
-                        <div class="bg-stone-900/50 p-3.5 rounded-xl border border-stone-800 flex items-center justify-between">
-                            <span class="flex items-center gap-2"><i class="fa-solid fa-recycle text-eco-light"></i> Certificado de Aprovechamiento Homologado</span>
-                            <span class="text-[9px] bg-eco/10 text-eco-light px-2 py-0.5 rounded">Expedido</span>
+                        <div class="card-warm p-3.5 flex items-center justify-between">
+                            <span class="flex items-center gap-2 font-semibold" style="color:#3D2817;"><i class="fa-solid fa-recycle" style="color:#10B981;"></i> Certificado de Aprovechamiento Homologado</span>
+                            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold" style="background:#D1FAE5; color:#065F46;">Expedido</span>
                         </div>
-                        <div class="bg-stone-900/50 p-3.5 rounded-xl border border-stone-800 flex items-center justify-between">
-                            <span class="flex items-center gap-2"><i class="fa-solid fa-graduation-cap text-sky-400"></i> Talleres Ambientales Certificados</span>
-                            <span class="text-[9px] bg-sky-500/10 text-sky-400 px-2 py-0.5 rounded">Capacitación</span>
+                        <div class="card-warm p-3.5 flex items-center justify-between">
+                            <span class="flex items-center gap-2 font-semibold" style="color:#3D2817;"><i class="fa-solid fa-graduation-cap" style="color:#0EA5E9;"></i> Talleres Ambientales Certificados</span>
+                            <span class="text-[9px] px-2 py-0.5 rounded-full font-bold" style="background:#E0F2FE; color:#075985;">Capacitación</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Calculadora de Impacto Social -->
-                <div class="lg:col-span-6 bg-gradient-to-b from-amber-950/20 to-stone-900/20 p-6 rounded-2xl border border-amber-500/20 shadow-2xl space-y-6">
+                <div class="lg:col-span-6 p-6 rounded-2xl space-y-6 reveal"
+                     style="background: linear-gradient(180deg, #FFFBEB 0%, #FEF3C7 50%, #FDE68A 100%); border: 1px solid rgba(245,158,11,.35); box-shadow: 0 12px 36px -18px rgba(180,83,9,.55);">
                     <div>
-                        <h4 class="font-serif text-lg text-amber-400">Calculadora de Impacto Social</h4>
-                        <p class="text-[11px] text-stone-400">Mueve los parámetros para simular el impacto de tu donación de PET o compra de Miel Ecopiensa.</p>
+                        <h4 class="font-serif text-lg" style="color:#B45309;">Calculadora de Impacto Social</h4>
+                        <p class="text-[11px]" style="color: #78350F;">Mueve los parámetros para simular el impacto de tu donación de PET o compra de Miel Ecopiensa.</p>
                     </div>
 
-                    <!-- Slider de Miel Comprada -->
                     <div class="space-y-2">
-                        <div class="flex justify-between text-xs font-bold text-stone-300">
+                        <div class="flex justify-between text-xs font-bold" style="color:#78350F;">
                             <span>Frascos de Miel Comprados:</span>
-                            <span class="text-amber-400 font-extrabold" id="calc-honey-val">60 Frascos</span>
+                            <span class="font-extrabold" id="calc-honey-val" style="color:#B45309;">60 Frascos</span>
                         </div>
-                        <input type="range" id="calc-honey" min="10" max="1500" value="60" step="10" class="w-full accent-amber-500 bg-stone-800" oninput="updateCalculator()">
+                        <input type="range" id="calc-honey" min="10" max="1500" value="60" step="10" oninput="updateCalculator()">
                     </div>
 
-                    <!-- Slider de Plástico PET Reciclado -->
                     <div class="space-y-2">
-                        <div class="flex justify-between text-xs font-bold text-stone-300">
+                        <div class="flex justify-between text-xs font-bold" style="color:#78350F;">
                             <span>Plástico PET Reciclado (Toneladas):</span>
-                            <span class="text-eco-light font-extrabold" id="calc-pet-val">2 Toneladas</span>
+                            <span class="font-extrabold" id="calc-pet-val" style="color:#047857;">2 Toneladas</span>
                         </div>
-                        <input type="range" id="calc-pet" min="1" max="50" value="2" step="1" class="w-full accent-eco bg-stone-800" oninput="updateCalculator()">
+                        <input type="range" id="calc-pet" min="1" max="50" value="2" step="1" oninput="updateCalculator()">
                     </div>
 
-                    <!-- Resultados Financieros y Sociales -->
-                    <div class="bg-black/40 rounded-xl p-4 border border-white/5 grid grid-cols-2 gap-4 text-center">
+                    <div class="rounded-xl p-4 grid grid-cols-2 gap-4 text-center" style="background: rgba(255,255,255,.85); border: 1px solid rgba(180,83,9,.15);">
                         <div>
-                            <span class="text-[9px] uppercase text-stone-500 font-extrabold block">Horas de Impresión 3D</span>
-                            <span class="text-2xl font-extrabold text-amber-400" id="res-hours">220 hrs</span>
+                            <span class="text-[9px] uppercase font-extrabold block" style="color: #A88B6A;">Horas de Impresión 3D</span>
+                            <span class="text-2xl font-extrabold" id="res-hours" style="color:#B45309;">220 hrs</span>
                         </div>
                         <div>
-                            <span class="text-[9px] uppercase text-stone-500 font-extrabold block">Prótesis Financiadas</span>
-                            <span class="text-2xl font-extrabold text-eco-light" id="res-prosthetics">2</span>
+                            <span class="text-[9px] uppercase font-extrabold block" style="color: #A88B6A;">Prótesis Financiadas</span>
+                            <span class="text-2xl font-extrabold" id="res-prosthetics" style="color:#047857;">2</span>
                         </div>
                     </div>
 
-                    <button onclick="scrollToSection('contact')" class="w-full py-3 bg-gradient-to-r from-eco to-eco-dark hover:from-eco-light hover:to-eco text-white font-extrabold text-xs rounded-xl shadow transition">
+                    <button onclick="scrollToSection('contact')" class="w-full py-3 font-extrabold text-xs rounded-xl text-white shadow-lg transition hover:scale-[1.02]"
+                            style="background: linear-gradient(135deg, #10B981, #047857);">
                         Presentar Intención de Alianza Institucional
                     </button>
                 </div>
             </div>
 
-            <!-- Bloque 5: Contacto Directo Integrado -->
-            <div id="contact" class="pt-12 border-t border-stone-900 grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <div class="space-y-6">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-eco/10 text-eco-light border border-eco/20">
+            <!-- BLOQUE 5: CONTACTO -->
+            <div id="contact" class="pt-12 grid grid-cols-1 lg:grid-cols-2 gap-12 scroll-mt-28" style="border-top: 1px solid rgba(180,83,9,.18);">
+                <div class="space-y-6 reveal">
+                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold"
+                          style="background: linear-gradient(135deg, #D1FAE5, #A7F3D0); color: #065F46; border: 1px solid rgba(16,185,129,.3);">
                         <i class="fa-solid fa-headset"></i> Atención Directa
                     </span>
-                    <h3 class="text-3xl font-serif text-white font-bold">Comunícate con la Fundación</h3>
-                    <p class="text-stone-300 text-sm leading-relaxed">
+                    <h3 class="text-3xl font-serif font-bold" style="color:#3D2817;">Comunícate con la Fundación</h3>
+                    <p class="text-sm leading-relaxed" style="color: #6B5239;">
                         ¿Tienes dudas sobre los santuarios de rescate de abejas, deseas programar una compra institucional o te gustaría postular a un beneficiario (persona o mascota) para el programa gratuito de prótesis? Contáctanos de inmediato.
                     </p>
 
-                    <!-- Tarjetas de canales físicos de contacto -->
-                    <div class="space-y-4 text-xs text-stone-300">
-                        <div class="flex items-center space-x-3 bg-stone-900/50 p-4 rounded-xl border border-stone-800">
-                            <i class="fa-solid fa-envelope text-amber-400 text-lg"></i>
+                    <div class="space-y-4 text-xs">
+                        <div class="card-warm p-4 flex items-center space-x-3">
+                            <i class="fa-solid fa-envelope text-lg" style="color:#D97706;"></i>
                             <div>
-                                <p class="text-[10px] text-stone-500">Correo Electrónico Oficial</p>
-                                <a href="mailto:fundacionecopiensaevolution@gmail.com" class="font-bold text-white hover:text-amber-400 underline">fundacionecopiensaevolution@gmail.com</a>
+                                <p class="text-[10px]" style="color: #A88B6A;">Correo Electrónico Oficial</p>
+                                <a href="mailto:fundacionecopiensaevolution@gmail.com" class="font-bold underline hover:opacity-80" style="color:#3D2817;">fundacionecopiensaevolution@gmail.com</a>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-3 bg-stone-900/50 p-4 rounded-xl border border-stone-800">
-                            <i class="fa-brands fa-whatsapp text-emerald-500 text-lg"></i>
+                        <div class="card-warm p-4 flex items-center space-x-3">
+                            <i class="fa-brands fa-whatsapp text-lg" style="color:#10B981;"></i>
                             <div>
-                                <p class="text-[10px] text-stone-500">WhatsApp / Teléfono</p>
-                                <a href="tel:+573222070501" class="font-bold text-white hover:text-emerald-400 underline">+57 322 207 0501</a>
+                                <p class="text-[10px]" style="color: #A88B6A;">WhatsApp / Teléfono</p>
+                                <a href="tel:+573222070501" class="font-bold underline hover:opacity-80" style="color:#3D2817;">+57 322 207 0501</a>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-3 bg-stone-900/50 p-4 rounded-xl border border-stone-800">
-                            <i class="fa-solid fa-location-dot text-eco-light text-lg"></i>
+                        <div class="card-warm p-4 flex items-center space-x-3">
+                            <i class="fa-solid fa-location-dot text-lg" style="color:#047857;"></i>
                             <div>
-                                <p class="text-[10px] text-stone-500">Presencia Nacional</p>
-                                <p class="font-bold text-white">Sedes en Bogotá, Medellín, Tuluá y otras ciudades de Colombia</p>
+                                <p class="text-[10px]" style="color: #A88B6A;">Presencia Nacional</p>
+                                <p class="font-bold" style="color:#3D2817;">Sedes en Bogotá, Medellín, Tuluá y otras ciudades de Colombia</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Formulario Dinámico -->
-                <div class="glass-premium p-6 rounded-2xl border border-amber-500/20 shadow-2xl space-y-4">
-                    <h4 class="font-serif text-lg text-amber-400 font-bold">Envíanos un Mensaje Seguro</h4>
-                    <form onsubmit="handleContactSubmit(event)" class="space-y-4 text-xs">
+                <div class="glass-premium p-6 rounded-2xl space-y-4 reveal">
+                    <h4 class="font-serif text-lg font-bold" style="color:#B45309;">Envíanos un Mensaje Seguro</h4>
+                    <form onsubmit="handleContactSubmit(event)" class="space-y-4">
                         <div>
-                            <label class="block text-stone-400 font-semibold mb-1">Nombre Completo / Entidad:</label>
-                            <input type="text" id="contact-name" required class="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
+                            <label class="form-label">Nombre Completo / Entidad:</label>
+                            <input type="text" id="contact-name" required class="form-input">
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-stone-400 font-semibold mb-1">Correo Electrónico:</label>
-                                <input type="email" id="contact-email" required class="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
+                                <label class="form-label">Correo Electrónico:</label>
+                                <input type="email" id="contact-email" required class="form-input">
                             </div>
                             <div>
-                                <label class="block text-stone-400 font-semibold mb-1">Teléfono:</label>
-                                <input type="tel" id="contact-phone" placeholder="Ej: +57" class="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
+                                <label class="form-label">Teléfono:</label>
+                                <input type="tel" id="contact-phone" placeholder="Ej: +57" class="form-input">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-stone-400 font-semibold mb-1">Tipo de Solicitud:</label>
-                            <select id="contact-type" class="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none">
+                            <label class="form-label">Tipo de Solicitud:</label>
+                            <select id="contact-type" class="form-input">
                                 <option value="honey">Comprar Miel Premium (Conservación)</option>
                                 <option value="sponsor">Patrocinar Prótesis / Donar Equipamiento</option>
                                 <option value="beneficiary">Postular un Beneficiario de Prótesis Gratuita</option>
@@ -658,10 +1046,10 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-stone-400 font-semibold mb-1">Mensaje o Propuesta:</label>
-                            <textarea id="contact-message" required rows="3" class="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-white focus:border-amber-400 outline-none resize-none" placeholder="Cuéntanos los detalles de tu contacto..."></textarea>
+                            <label class="form-label">Mensaje o Propuesta:</label>
+                            <textarea id="contact-message" required rows="3" class="form-input resize-none" placeholder="Cuéntanos los detalles de tu contacto..."></textarea>
                         </div>
-                        <button type="submit" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-extrabold rounded-lg shadow hover:opacity-90 transition">
+                        <button type="submit" class="btn-honey w-full py-3 font-extrabold text-sm rounded-lg">
                             Enviar Solicitud
                         </button>
                     </form>
@@ -672,42 +1060,52 @@
 
     </main>
 
-    <!-- PIE DE PÁGINA (FOOTER) -->
-    <footer class="w-full py-8 px-6 bg-black border-t border-stone-900 text-stone-500 text-xs mt-20">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <!-- ===== FOOTER ===== -->
+    <footer class="w-full py-10 px-6 text-xs mt-20 relative overflow-hidden"
+            style="background: linear-gradient(180deg, #3D2817 0%, #2C1810 100%); color: #D4B896;">
+        <div class="absolute inset-0 opacity-[0.08] pointer-events-none"
+             style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%22100%22 viewBox=%220 0 56 100%22%3E%3Cg fill=%22none%22 stroke=%22%23F59E0B%22 stroke-width=%221%22%3E%3Cpath d=%22M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100%22/%3E%3Cpath d=%22M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34%22/%3E%3C/g%3E%3C/svg%3E');"></div>
+
+        <div class="relative max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex items-center space-x-3">
                 <img id="footer-logo"
-                     src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png" 
-                     alt="Logo" 
-                     class="h-9 w-9 object-contain rounded-full bg-stone-900 p-0.5 border border-eco/30" 
+                     src="https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png"
+                     alt="Logo"
+                     class="h-10 w-10 object-contain rounded-full p-0.5 border border-honey-500/40"
+                     style="background: rgba(255,251,240,.1);"
                      onerror="handleLogoError(this)">
                 <div>
-                    <p class="font-bold text-stone-300">Fundación Ecopiensa Evolution</p>
-                    <p class="text-[10px] text-stone-500">Tuluá, Valle del Cauca - Cobertura en toda Colombia.</p>
+                    <p class="font-bold" style="color:#FDE68A;">Fundación Ecopiensa Evolution</p>
+                    <p class="text-[10px]" style="color:#A88B6A;">Tuluá, Valle del Cauca - Cobertura en toda Colombia.</p>
                 </div>
             </div>
-            <div class="flex flex-wrap gap-4 items-center justify-center text-stone-400 text-[11px]">
-                <a href="https://www.facebook.com/FundacionEecopiensaEvolution" target="_blank" class="hover:text-amber-400 transition flex items-center gap-1"><i class="fa-brands fa-facebook"></i> Facebook</a>
-                <span class="text-stone-800">|</span>
-                <a href="https://www.instagram.com/f.ecopiensa_evolution" target="_blank" class="hover:text-amber-400 transition flex items-center gap-1"><i class="fa-brands fa-instagram"></i> Instagram</a>
-                <span class="text-stone-800">|</span>
-                <span class="text-[10px] text-stone-600">NIT 900998128-1</span>
+            <div class="flex flex-wrap gap-4 items-center justify-center text-[11px]" style="color:#D4B896;">
+                <a href="https://www.facebook.com/FundacionEecopiensaEvolution" target="_blank" class="hover:text-honey-300 transition flex items-center gap-1"><i class="fa-brands fa-facebook"></i> Facebook</a>
+                <span style="color:#78350F;">|</span>
+                <a href="https://www.instagram.com/f.ecopiensa_evolution" target="_blank" class="hover:text-honey-300 transition flex items-center gap-1"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                <span style="color:#78350F;">|</span>
+                <span class="text-[10px]" style="color:#8B6F47;">NIT 900998128-1</span>
             </div>
         </div>
-        <div class="max-w-6xl mx-auto text-center mt-6 pt-4 border-t border-stone-950 text-[10px] text-stone-600">
+        <div class="relative max-w-6xl mx-auto text-center mt-6 pt-4 text-[10px]" style="border-top: 1px solid rgba(245,158,11,.15); color: #8B6F47;">
             &copy; 2026 Fundación Ecopiensa Evolution. Todos los derechos reservados. Miel Ecopiensa Premium y el programa Ecobiónica son iniciativas ecológicas patentadas.
         </div>
     </footer>
 
-    <!-- JAVASCRIPT & LOGICA DE LA APLICACIÓN -->
+    <!-- LIGHTBOX -->
+    <div id="lightbox" class="lightbox hidden" onclick="closeLightbox(event)">
+        <button class="lightbox-close" type="button">&times;</button>
+        <img id="lightbox-img" src="" alt="">
+        <p id="lightbox-caption" class="lightbox-caption"></p>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
     <script>
-        // Map packaged Three.js to window.THREE so our existing procedural asset generator works perfectly
         window.THREE = window.MINDAR.IMAGE.THREE;
 
         let activeView = 'splash';
         let arScore = 0;
 
-        // MindARThree core instance & ThreeJS nodes
         let mindarThreeInstance = null;
         let beeGroup = null;
         let wings = [];
@@ -715,17 +1113,15 @@
         let antennaeGroup = null;
         let clock = new THREE.Clock();
 
-        // Interactive flight state variables (Organic Flight Dash)
         let isDashing = false;
         let dashStartTime = 0;
-        const dashDuration = 0.9; // seconds
+        const dashDuration = 0.9;
         let beeStartPos = new THREE.Vector3();
         let beeEndPos = new THREE.Vector3();
         let beeRotationYStart = 0;
         let beeRotationYEnd = 0;
         let beeMidHeightOffset = 0;
 
-        // AI Hand Pose Recognition & Simulated Attraction Tracking
         let handsDetector = null;
         let lastHandInferenceTime = 0;
         let lastHandTime = 0;
@@ -736,41 +1132,29 @@
         let touchHoldPos = new THREE.Vector3();
         let isTouchHolding = false;
 
-        // Synth audio (Tone.js)
         let synth;
         let purrSynth;
         let lastPurrPlay = 0;
         let isTargetDetected = false;
 
-        // Robust Fallback Handler for Ecopiensa Foundation Logo
         function handleLogoError(img) {
-            if (!img.dataset.tryCount) {
-                img.dataset.tryCount = 1;
-            } else {
-                img.dataset.tryCount = parseInt(img.dataset.tryCount) + 1;
-            }
-            
+            if (!img.dataset.tryCount) img.dataset.tryCount = 1;
+            else img.dataset.tryCount = parseInt(img.dataset.tryCount) + 1;
+
             const tries = [
-                "https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png", // double space raw URL
-                "https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png", // single space raw URL
-                "logo ecopiensa  traspaewncia.png", // local relative double space
-                "logo ecopiensa traspaewncia.png", // local relative single space
+                "https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20%20traspaewncia.png",
+                "https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecopiensa%20traspaewncia.png",
+                "logo ecopiensa  traspaewncia.png",
+                "logo ecopiensa traspaewncia.png",
                 "https://placehold.co/200x200/047857/ffffff?text=Ecopiensa"
             ];
-            
-            let index = parseInt(img.dataset.tryCount) - 1;
-            if (index < tries.length) {
-                img.src = tries[index];
-            }
+            const index = parseInt(img.dataset.tryCount) - 1;
+            if (index < tries.length) img.src = tries[index];
         }
 
-        // Robust Fallback Handler for Ecobiónica Program Logo
         function handleEcobionicaError(img) {
-            if (!img.dataset.tryCount) {
-                img.dataset.tryCount = 1;
-            } else {
-                img.dataset.tryCount = parseInt(img.dataset.tryCount) + 1;
-            }
+            if (!img.dataset.tryCount) img.dataset.tryCount = 1;
+            else img.dataset.tryCount = parseInt(img.dataset.tryCount) + 1;
 
             const tries = [
                 "https://raw.githubusercontent.com/FUNDACIONECOPIENSAEVOLUTION/Miel-Ecopiensa/main/logo%20ecobionica%20con%20trasparencia.png",
@@ -779,24 +1163,23 @@
                 "logo ecobionica.PNG",
                 "https://placehold.co/400x120/10b981/ffffff?text=ECOBIONICA"
             ];
-
-            let index = parseInt(img.dataset.tryCount) - 1;
-            if (index < tries.length) {
-                img.src = tries[index];
-            }
+            const index = parseInt(img.dataset.tryCount) - 1;
+            if (index < tries.length) img.src = tries[index];
         }
 
-        // Toast Messages helper
         function showToast(title, text, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = `p-4 mb-3 rounded-xl border shadow-2xl transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-start gap-3 w-full ${
-                type === 'success' ? 'bg-eco-dark/95 border-eco text-white' : 'bg-amber-950/95 border-amber-500 text-amber-100'
-            }`;
-            
+            toast.className = `p-4 mb-3 rounded-xl shadow-2xl transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-start gap-3 w-full`;
+            toast.style.border = type === 'success' ? '1px solid #10B981' : '1px solid #F59E0B';
+            toast.style.background = type === 'success'
+                ? 'linear-gradient(135deg, #065F46, #047857)'
+                : 'linear-gradient(135deg, #78350F, #92400E)';
+            toast.style.color = '#FFFFFF';
+
             toast.innerHTML = `
                 <div class="text-base mt-0.5">
-                    ${type === 'success' ? '<i class="fa-solid fa-circle-check text-eco-light"></i>' : '<i class="fa-solid fa-circle-info text-amber-400"></i>'}
+                    ${type === 'success' ? '<i class="fa-solid fa-circle-check" style="color:#6EE7B7"></i>' : '<i class="fa-solid fa-circle-info" style="color:#FCD34D"></i>'}
                 </div>
                 <div class="flex-grow">
                     <h4 class="font-bold text-xs">${title}</h4>
@@ -804,20 +1187,15 @@
                 </div>
                 <button onclick="this.parentElement.remove()" class="text-xs opacity-50 hover:opacity-100"><i class="fa-solid fa-xmark"></i></button>
             `;
-            
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
 
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
             }, 5500);
         }
 
-        // Dynamic views router
         function navigateTo(viewId) {
             document.getElementById('view-splash').classList.add('hidden');
             document.getElementById('view-ar').classList.add('hidden');
@@ -826,13 +1204,12 @@
             document.getElementById(`view-${viewId}`).classList.remove('hidden');
             activeView = viewId;
 
-            // Hide main menu header on AR layout for full screen
+            const heroWrapper = document.getElementById('hero-wrapper');
+            if (heroWrapper) heroWrapper.classList.toggle('hidden', viewId !== 'splash');
+
             const header = document.querySelector('header');
-            if (viewId === 'ar') {
-                header.classList.add('-translate-y-full');
-            } else {
-                header.classList.remove('-translate-y-full');
-            }
+            if (viewId === 'ar') header.classList.add('-translate-y-full');
+            else header.classList.remove('-translate-y-full');
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -841,13 +1218,46 @@
             navigateTo('product-info');
             setTimeout(() => {
                 const element = document.getElementById(id);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+                if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 180);
         }
 
-        // Sound Synthesizers (Buzzing and purring algorithms)
+        function scrollToGaleria() {
+            navigateTo('splash');
+            setTimeout(() => {
+                const el = document.getElementById('galeria');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 220);
+        }
+
+        function openLightbox(src, alt) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            const cap = document.getElementById('lightbox-caption');
+            img.src = src;
+            img.alt = alt || '';
+            cap.innerText = alt || '';
+            lb.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox(event) {
+            if (event && event.target && event.target.tagName === 'IMG') return;
+            const lb = document.getElementById('lightbox');
+            lb.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const lb = document.getElementById('lightbox');
+                if (lb && !lb.classList.contains('hidden')) {
+                    lb.classList.add('hidden');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+
         function playBuzzSound() {
             try {
                 if (!synth) {
@@ -858,27 +1268,20 @@
                     });
                 }
                 const now = Tone.now();
-                // Doppler displacement simulation
                 synth.triggerAttackRelease("E2", "8n", now);
                 synth.triggerAttackRelease("A2", "8n", now + 0.1);
                 synth.triggerAttackRelease("D3", "4n", now + 0.2);
-            } catch (error) {
-                console.log("Audio feedback error: ", error);
-            }
+            } catch (e) { console.log("Audio buzz: ", e); }
         }
 
         function playLockSound() {
             try {
-                if (!synth) {
-                    synth = new Tone.PolySynth(Tone.Synth).toDestination();
-                }
+                if (!synth) synth = new Tone.PolySynth(Tone.Synth).toDestination();
                 const now = Tone.now();
                 synth.triggerAttackRelease("G4", "16n", now);
                 synth.triggerAttackRelease("B4", "16n", now + 0.08);
                 synth.triggerAttackRelease("E5", "8n", now + 0.16);
-            } catch (error) {
-                console.log("Audio lock error: ", error);
-            }
+            } catch (e) { console.log("Audio lock: ", e); }
         }
 
         function playHappyPurr(isAttracted) {
@@ -890,42 +1293,30 @@
                         envelope: { attack: 0.1, decay: 0.2, sustain: 0.8, release: 0.4 },
                         filterEnvelope: { attack: 0.05, decay: 0.1, sustain: 0.5, baseFrequency: 80, octaves: 1.5 }
                     }).toDestination();
-                    purrSynth.volume.value = -12; // soft volume
+                    purrSynth.volume.value = -12;
                 }
-                
                 const now = Tone.now();
                 if (now - lastPurrPlay > 0.18) {
                     lastPurrPlay = now;
-                    const note = isAttracted ? "A1" : "E1"; // Low comforting frequency vibration
+                    const note = isAttracted ? "A1" : "E1";
                     purrSynth.triggerAttackRelease(note, "8n", now);
                 }
-            } catch (error) {
-                // ignore audio errors
-            }
+            } catch (e) {}
         }
 
-        // Active AI Hand Landmark Callback from MediaPipe Frame Capture
         function onHandResults(results) {
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const landmarks = results.multiHandLandmarks[0];
-                
-                // Landmark 9 represents the MCP joint of the middle finger (the palm center)
-                const point = landmarks[9]; 
-                
-                // Convert normalized coordinates (0 to 1) to local coordinate range of the tracking canvas
+                const point = landmarks[9];
                 const targetX = (point.x - 0.5) * 2.2;
                 const targetY = -(point.y - 0.5) * 1.8;
-                const targetZ = -0.35; // Position the land plane slightly forward of the tag
-                
+                const targetZ = -0.35;
                 handTargetPos.set(targetX, targetY, targetZ);
                 isHandDetected = true;
                 lastHandTime = clock.getElapsedTime();
-                
-                // Update UI text
                 document.getElementById('hand-status-dot').className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-500 animate-ping";
                 document.getElementById('hand-status-text').innerText = "Sensor de Mano IA Activo • ¡Mano Detectada!";
             } else {
-                // Decelerate attraction if no hand is tracked in this frame
                 if (clock.getElapsedTime() - lastHandTime > 0.4) {
                     isHandDetected = false;
                     document.getElementById('hand-status-dot').className = "relative inline-flex rounded-full h-2 w-2 bg-amber-500 animate-pulse";
@@ -940,13 +1331,11 @@
 
             arScore = 0;
             document.getElementById('ar-score').innerText = arScore;
-
             isTargetDetected = false;
             updateScannerHUDState(false);
 
             await Tone.start();
 
-            // Setup MediaPipe Hands Detector if available
             try {
                 if (window.Hands) {
                     handsDetector = new window.Hands({
@@ -954,19 +1343,14 @@
                     });
                     handsDetector.setOptions({
                         maxNumHands: 1,
-                        modelComplexity: 0, // 0 is fast, optimized for mobile CPU usage
+                        modelComplexity: 0,
                         minDetectionConfidence: 0.6,
                         minTrackingConfidence: 0.6
                     });
                     handsDetector.onResults(onHandResults);
-                } else {
-                    console.warn("MediaPipe Hands library not loaded from CDN.");
                 }
-            } catch (e) {
-                console.error("Failed to init MediaPipe: ", e);
-            }
+            } catch (e) { console.error("MediaPipe init: ", e); }
 
-            // Setup MindAR Three.js Wrapper pointing directly to the compiled target file
             try {
                 mindarThreeInstance = new MINDAR.IMAGE.MindARThree({
                     container: document.getElementById('canvas-container'),
@@ -975,7 +1359,6 @@
 
                 const { renderer, scene, camera } = mindarThreeInstance;
 
-                // Configure scene lighting inside MindAR frame
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
                 scene.add(ambientLight);
 
@@ -983,30 +1366,23 @@
                 spotLight.position.set(2, 5, 4);
                 scene.add(spotLight);
 
-                // Build Procedural tricolor bee model
                 buildTricolorBeeModel();
 
-                // Build Holographic Bio-Receptive Target indicator for hand landing
                 const ringGeo = new THREE.RingGeometry(0.08, 0.1, 32);
                 const ringMat = new THREE.MeshBasicMaterial({
-                    color: 0x10b981,
-                    side: THREE.DoubleSide,
-                    transparent: true,
-                    opacity: 0.8
+                    color: 0x10b981, side: THREE.DoubleSide, transparent: true, opacity: 0.8
                 });
                 holographicTargetMesh = new THREE.Mesh(ringGeo, ringMat);
                 const dotGeo = new THREE.SphereGeometry(0.015, 16, 16);
                 const dotMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
                 const dot = new THREE.Mesh(dotGeo, dotMat);
                 holographicTargetMesh.add(dot);
-                holographicTargetMesh.rotation.x = Math.PI / 2; // Flat horizontal appearance
+                holographicTargetMesh.rotation.x = Math.PI / 2;
 
-                // Add procedural bee and holographic node inside tracking anchor group (ID 0 matches targets.mind single target)
                 const anchor = mindarThreeInstance.addAnchor(0);
                 anchor.group.add(beeGroup);
                 anchor.group.add(holographicTargetMesh);
 
-                // Dynamic visibility matching target status requested by the user
                 anchor.onTargetFound = () => {
                     isTargetDetected = true;
                     playLockSound();
@@ -1020,51 +1396,36 @@
                     showToast("Buscando Tarro...", "Apunta de nuevo a la etiqueta de miel para ver la abeja.", "info");
                 };
 
-                // Add touch raycasting onto canvas container inside MindAR loop
                 const raycaster = new THREE.Raycaster();
                 const mouse = new THREE.Vector2();
-
                 const container = document.getElementById('canvas-container');
 
-                // Pointer Events for double-mode interaction (Raycast touch escape OR attract simulation)
                 container.addEventListener('pointerdown', (event) => {
                     if (!isTargetDetected) return;
-
-                    // 1. Raycast check if bee clicked directly
                     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
                     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
                     raycaster.setFromCamera(mouse, camera);
                     const intersects = raycaster.intersectObjects(anchor.group.children, true);
 
                     let beeHit = false;
                     if (intersects.length > 0) {
-                        // Check if intersect hits the actual bee, not the target ring
                         intersects.forEach(hit => {
                             let parent = hit.object;
                             while (parent) {
-                                if (parent === beeGroup) {
-                                    beeHit = true;
-                                    break;
-                                }
+                                if (parent === beeGroup) { beeHit = true; break; }
                                 parent = parent.parent;
                             }
                         });
                     }
-
-                    if (beeHit) {
-                        onBeeClicked();
-                    } else {
-                        // If not clicked on the bee, treat it as holding down a simulated hand target!
+                    if (beeHit) onBeeClicked();
+                    else {
                         isTouchHolding = true;
                         updateSimulatedHandPos(event);
                     }
                 });
 
                 container.addEventListener('pointermove', (event) => {
-                    if (isTouchHolding && isTargetDetected) {
-                        updateSimulatedHandPos(event);
-                    }
+                    if (isTouchHolding && isTargetDetected) updateSimulatedHandPos(event);
                 });
 
                 container.addEventListener('pointerup', () => {
@@ -1078,23 +1439,17 @@
                 });
 
                 function updateSimulatedHandPos(event) {
-                    // Convert screen pointer coordinates to local space
                     const xNorm = (event.clientX / window.innerWidth - 0.5) * 2.2;
                     const yNorm = -(event.clientY / window.innerHeight - 0.5) * 1.8;
                     touchHoldPos.set(xNorm, yNorm, -0.35);
                     isSimulatedHandActive = true;
                 }
 
-                // Start MindAR Engine
                 await mindarThreeInstance.start();
-
-                // Start animation frames
-                renderer.setAnimationLoop(() => {
-                    animateThreeJS(renderer, scene, camera);
-                });
+                renderer.setAnimationLoop(() => animateThreeJS(renderer, scene, camera));
 
             } catch (err) {
-                console.error("Failed to boot MindAR: ", err);
+                console.error("MindAR boot: ", err);
                 showToast("Error de Acceso", "Asegúrate de otorgar permisos de cámara o recarga el navegador.", "error");
                 stopAR();
             }
@@ -1105,20 +1460,12 @@
                 try {
                     mindarThreeInstance.stop();
                     const { renderer } = mindarThreeInstance;
-                    if (renderer) {
-                        renderer.setAnimationLoop(null);
-                    }
-                } catch (e) {
-                    console.log("Cleanup handled cleanly: ", e);
-                }
+                    if (renderer) renderer.setAnimationLoop(null);
+                } catch (e) { console.log("Cleanup: ", e); }
                 mindarThreeInstance = null;
             }
-
-            const canvasContainer = document.getElementById('canvas-container');
-            if (canvasContainer) {
-                canvasContainer.innerHTML = '';
-            }
-
+            const cc = document.getElementById('canvas-container');
+            if (cc) cc.innerHTML = '';
             navigateTo('splash');
         }
 
@@ -1127,130 +1474,98 @@
             const reticle = document.getElementById('scan-reticle');
             const statusText = document.getElementById('scan-status-text');
             const progressBar = document.getElementById('scan-bar-progress');
-
             if (!reticle) return;
 
             if (isLocked) {
-                // Ocultar la retícula y guías visuales completamente cuando la abeja está cargada
                 scannerHud.classList.add('opacity-0', 'pointer-events-none');
-                
                 reticle.classList.remove('border-red-500/40');
                 reticle.classList.add('border-eco-light', 'scale-105');
                 statusText.innerText = "¡Abeja Detectada!";
-                statusText.className = "text-xs text-eco-light font-extrabold tracking-wider uppercase drop-shadow";
+                statusText.className = "text-xs font-extrabold tracking-wider uppercase drop-shadow";
+                statusText.style.color = "#6EE7B7";
                 if (progressBar) {
-                    progressBar.className = "w-full h-full bg-eco transition-all duration-200";
+                    progressBar.className = "w-full h-full transition-all duration-200";
+                    progressBar.style.background = "#10B981";
                     progressBar.style.width = "100%";
                 }
-                
-                if (beeGroup) {
-                    beeGroup.visible = true;
-                }
+                if (beeGroup) beeGroup.visible = true;
             } else {
-                // Mostrar la retícula cuando volvemos a buscar el tarro
                 scannerHud.classList.remove('opacity-0', 'pointer-events-none');
-                
                 reticle.classList.add('border-red-500/40');
                 reticle.classList.remove('border-eco-light', 'scale-105');
                 statusText.innerText = "Buscando Etiqueta...";
                 statusText.className = "text-xs text-red-400 font-bold tracking-wider uppercase drop-shadow";
+                statusText.style.color = "";
                 if (progressBar) {
                     progressBar.className = "w-0 h-full bg-red-500 transition-all duration-200";
                     progressBar.style.width = "0%";
                 }
-                
-                if (beeGroup) {
-                    beeGroup.visible = false;
-                }
+                if (beeGroup) beeGroup.visible = false;
             }
         }
 
         function buildTricolorBeeModel() {
             beeGroup = new THREE.Group();
 
-            // 1. Thorax (Realistic dark copper body with hair-like roughness)
-            const thoraxGeo = new THREE.SphereGeometry(0.55, 32, 32);
-            const thoraxMat = new THREE.MeshStandardMaterial({
-                color: 0x2b1e10,
-                roughness: 0.65,
-                metalness: 0.35
-            });
-            const thorax = new THREE.Mesh(thoraxGeo, thoraxMat);
+            const thorax = new THREE.Mesh(
+                new THREE.SphereGeometry(0.55, 32, 32),
+                new THREE.MeshStandardMaterial({ color: 0x2b1e10, roughness: 0.65, metalness: 0.35 })
+            );
             beeGroup.add(thorax);
 
-            // 2. Head (Dark shiny bug head)
-            const headGeo = new THREE.SphereGeometry(0.38, 32, 32);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0x140e08, roughness: 0.3 });
-            const head = new THREE.Mesh(headGeo, headMat);
+            const head = new THREE.Mesh(
+                new THREE.SphereGeometry(0.38, 32, 32),
+                new THREE.MeshStandardMaterial({ color: 0x140e08, roughness: 0.3 })
+            );
             head.position.set(0, 0.12, 0.6);
             beeGroup.add(head);
 
-            // 3. Eyes (Compound realistic glassy deep-blue eyes as per product artwork)
             const eyeGeo = new THREE.SphereGeometry(0.14, 16, 16);
             const eyeMat = new THREE.MeshStandardMaterial({
-                color: 0x1a45a3,
-                emissive: 0x0a1c52,
-                emissiveIntensity: 0.4,
-                roughness: 0.1,
-                metalness: 0.9
+                color: 0x1a45a3, emissive: 0x0a1c52, emissiveIntensity: 0.4, roughness: 0.1, metalness: 0.9
             });
-            
             const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
             leftEye.position.set(-0.2, 0.22, 0.78);
             leftEye.scale.set(1, 1.4, 1);
-            
             const rightEye = leftEye.clone();
             rightEye.position.x = 0.2;
-            
-            beeGroup.add(leftEye);
-            beeGroup.add(rightEye);
+            beeGroup.add(leftEye, rightEye);
 
-            // 4. Abdomen segmentado premium tricolor (Amarillo, Azul y Rojo) con aguijón
             const abdomenGroup = new THREE.Group();
-
-            // Segmento 1: Amarillo (Base del abdomen)
-            const seg1Geo = new THREE.CylinderGeometry(0.42, 0.48, 0.35, 16);
-            const seg1Mat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.3 });
-            const seg1 = new THREE.Mesh(seg1Geo, seg1Mat);
-            seg1.rotation.x = Math.PI / 2;
-            seg1.position.z = -0.15;
+            const seg1 = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.42, 0.48, 0.35, 16),
+                new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3, metalness: 0.3 })
+            );
+            seg1.rotation.x = Math.PI / 2; seg1.position.z = -0.15;
             abdomenGroup.add(seg1);
 
-            // Segmento 2: Espaciador negro
-            const seg2Geo = new THREE.CylinderGeometry(0.47, 0.47, 0.08, 16);
             const seg2Mat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.5 });
-            const seg2 = new THREE.Mesh(seg2Geo, seg2Mat);
-            seg2.rotation.x = Math.PI / 2;
-            seg2.position.z = -0.32;
+            const seg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.47, 0.47, 0.08, 16), seg2Mat);
+            seg2.rotation.x = Math.PI / 2; seg2.position.z = -0.32;
             abdomenGroup.add(seg2);
 
-            // Segmento 3: Azul (Parte central)
-            const seg3Geo = new THREE.CylinderGeometry(0.45, 0.4, 0.35, 16);
-            const seg3Mat = new THREE.MeshStandardMaterial({ color: 0x1e40af, roughness: 0.3, metalness: 0.4 });
-            const seg3 = new THREE.Mesh(seg3Geo, seg3Mat);
-            seg3.rotation.x = Math.PI / 2;
-            seg3.position.z = -0.5;
+            const seg3 = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.45, 0.4, 0.35, 16),
+                new THREE.MeshStandardMaterial({ color: 0x1e40af, roughness: 0.3, metalness: 0.4 })
+            );
+            seg3.rotation.x = Math.PI / 2; seg3.position.z = -0.5;
             abdomenGroup.add(seg3);
 
-            // Segmento 4: Espaciador negro
-            const seg4Geo = new THREE.CylinderGeometry(0.39, 0.39, 0.08, 16);
-            const seg4 = new THREE.Mesh(seg4Geo, seg2Mat);
-            seg4.rotation.x = Math.PI / 2;
-            seg4.position.z = -0.68;
+            const seg4 = new THREE.Mesh(new THREE.CylinderGeometry(0.39, 0.39, 0.08, 16), seg2Mat);
+            seg4.rotation.x = Math.PI / 2; seg4.position.z = -0.68;
             abdomenGroup.add(seg4);
 
-            // Segmento 5: Rojo (Punta)
-            const seg5Geo = new THREE.CylinderGeometry(0.38, 0.2, 0.35, 16);
-            const seg5Mat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3, metalness: 0.3 });
-            const seg5 = new THREE.Mesh(seg5Geo, seg5Mat);
-            seg5.rotation.x = Math.PI / 2;
-            seg5.position.z = -0.85;
+            const seg5 = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.38, 0.2, 0.35, 16),
+                new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.3, metalness: 0.3 })
+            );
+            seg5.rotation.x = Math.PI / 2; seg5.position.z = -0.85;
             abdomenGroup.add(seg5);
 
-            // Segmento 6: Aguijón metálico realista
-            const stingerGeo = new THREE.ConeGeometry(0.08, 0.2, 8);
-            const stingerMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.9 });
-            const stinger = new THREE.Mesh(stingerGeo, stingerMat);
+            const stinger = new THREE.Mesh(
+                new THREE.ConeGeometry(0.08, 0.2, 8),
+                new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.9 })
+            );
             stinger.rotation.x = -Math.PI / 2;
             stinger.position.set(0, -0.05, -1.05);
             abdomenGroup.add(stinger);
@@ -1258,275 +1573,209 @@
             abdomenGroup.position.set(0, -0.08, -0.2);
             beeGroup.add(abdomenGroup);
 
-            // 5. Delicate realistic insect legs (6 legs)
             legsGroup = new THREE.Group();
-            const legMaterial = new THREE.MeshStandardMaterial({ color: 0x0f0b07, roughness: 0.8 });
-            
+            const legMat = new THREE.MeshStandardMaterial({ color: 0x0f0b07, roughness: 0.8 });
             for (let i = 0; i < 6; i++) {
                 const legGroup = new THREE.Group();
                 const isLeft = i % 2 === 0;
-                const segment1 = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.4), legMaterial);
-                segment1.rotation.z = isLeft ? 0.8 : -0.8;
-                segment1.position.set(isLeft ? -0.2 : 0.2, -0.2, 0);
-                
-                const segment2 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.01, 0.4), legMaterial);
-                segment2.rotation.z = isLeft ? -0.4 : 0.4;
-                segment2.position.set(isLeft ? -0.38 : 0.38, -0.42, 0);
-                
-                legGroup.add(segment1);
-                legGroup.add(segment2);
-                
+                const s1 = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.4), legMat);
+                s1.rotation.z = isLeft ? 0.8 : -0.8;
+                s1.position.set(isLeft ? -0.2 : 0.2, -0.2, 0);
+                const s2 = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.01, 0.4), legMat);
+                s2.rotation.z = isLeft ? -0.4 : 0.4;
+                s2.position.set(isLeft ? -0.38 : 0.38, -0.42, 0);
+                legGroup.add(s1, s2);
                 legGroup.position.z = -0.2 + (Math.floor(i / 2) * 0.22);
                 legsGroup.add(legGroup);
             }
             beeGroup.add(legsGroup);
 
-            // 6. Antennae (2 detailed feelers on front of head)
             antennaeGroup = new THREE.Group();
             for (let i = 0; i < 2; i++) {
                 const isLeft = i === 0;
                 const antenna = new THREE.Group();
-                const part1 = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.35), legMaterial);
+                const part1 = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.35), legMat);
                 part1.rotation.z = isLeft ? -0.5 : 0.5;
                 part1.rotation.y = isLeft ? 0.2 : -0.2;
                 part1.position.set(isLeft ? -0.1 : 0.3, 0.3, 0.8);
-                
                 antenna.add(part1);
                 antennaeGroup.add(antenna);
             }
             beeGroup.add(antennaeGroup);
 
-            // 7. Shimmering quad wings structure (2 big front wings, 2 smaller back wings)
             const wingMat = new THREE.MeshStandardMaterial({
-                color: 0xcfe2fe,
-                transparent: true,
-                opacity: 0.6,
-                roughness: 0.05,
-                metalness: 0.95,
-                side: THREE.DoubleSide
+                color: 0xcfe2fe, transparent: true, opacity: 0.6, roughness: 0.05, metalness: 0.95, side: THREE.DoubleSide
             });
-
             const createWing = (w, h, x, y, z, rotZ, rotY) => {
-                const wingGeo = new THREE.BoxGeometry(w, 0.01, h);
-                const wing = new THREE.Mesh(wingGeo, wingMat);
+                const wing = new THREE.Mesh(new THREE.BoxGeometry(w, 0.01, h), wingMat);
                 wing.position.set(x, y, z);
                 wing.rotation.set(0, rotY, rotZ);
                 return wing;
             };
-
-            wings = [];
-            wings.push(createWing(0.9, 0.38, -0.65, 0.42, -0.05, -0.18, 0.2));  // Front Big Left
-            wings.push(createWing(0.6, 0.26, -0.5, 0.35, -0.28, -0.22, 0.1));   // Rear Small Left
-            wings.push(createWing(0.9, 0.38, 0.65, 0.42, -0.05, 0.18, -0.2));   // Front Big Right
-            wings.push(createWing(0.6, 0.26, 0.5, 0.35, -0.28, 0.22, -0.1));    // Rear Small Right
-
+            wings = [
+                createWing(0.9, 0.38, -0.65, 0.42, -0.05, -0.18, 0.2),
+                createWing(0.6, 0.26, -0.5, 0.35, -0.28, -0.22, 0.1),
+                createWing(0.9, 0.38, 0.65, 0.42, -0.05, 0.18, -0.2),
+                createWing(0.6, 0.26, 0.5, 0.35, -0.28, 0.22, -0.1)
+            ];
             wings.forEach(w => beeGroup.add(w));
 
-            // Setup scale matching the physical coordinate dimensions of targets.mind boundaries
             beeGroup.scale.set(0.6, 0.6, 0.6);
-            beeGroup.position.set(0, 0, 0);
             beeGroup.visible = false;
         }
 
         function animateThreeJS(renderer, scene, camera) {
             const time = clock.getElapsedTime();
 
-            // Run MediaPipe hands model on camera stream asynchronously inside thread
             const videoEl = document.querySelector('#canvas-container video');
             if (handsDetector && videoEl && videoEl.readyState === videoEl.HAVE_CURRENT_DATA) {
-                // Inference throttled to 12fps to ensure buttery performance
                 if (time - lastHandInferenceTime > 0.08) {
                     lastHandInferenceTime = time;
                     handsDetector.send({ image: videoEl }).catch(() => {});
                 }
             }
 
-            // Determine if a targeted landing zone (real hand or touch hold) is active
             const handActive = isHandDetected || isSimulatedHandActive;
             const activeTarget = isHandDetected ? handTargetPos : touchHoldPos;
 
             if (handActive && isTargetDetected) {
-                // Reveal biological land ring
                 holographicTargetMesh.position.copy(activeTarget);
                 holographicTargetMesh.visible = true;
-                holographicTargetMesh.rotation.z = time * 2; // spin beautifully
+                holographicTargetMesh.rotation.z = time * 2;
 
                 const dist = beeGroup.position.distanceTo(activeTarget);
-
                 if (dist > 0.08) {
-                    // 1. Attraction Flight State: fly towards the target center
                     beeGroup.position.lerp(activeTarget, 0.06);
-
-                    // Point head toward target smoothly
                     const dir = new THREE.Vector3().subVectors(activeTarget, beeGroup.position).normalize();
-                    const targetAngle = Math.atan2(dir.x, dir.z);
-                    beeGroup.rotation.y = targetAngle;
-
-                    // Flapping rapidly during transit
-                    const flapSpeed = 52;
-                    wings[0].rotation.z = -Math.abs(Math.sin(time * flapSpeed)) * 0.7 - 0.1;
-                    wings[1].rotation.z = -Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 - 0.1;
-                    wings[2].rotation.z = Math.abs(Math.sin(time * flapSpeed)) * 0.7 + 0.1;
-                    wings[3].rotation.z = Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 + 0.1;
-
+                    beeGroup.rotation.y = Math.atan2(dir.x, dir.z);
+                    const fs = 52;
+                    wings[0].rotation.z = -Math.abs(Math.sin(time * fs)) * 0.7 - 0.1;
+                    wings[1].rotation.z = -Math.abs(Math.sin(time * fs + 0.5)) * 0.5 - 0.1;
+                    wings[2].rotation.z = Math.abs(Math.sin(time * fs)) * 0.7 + 0.1;
+                    wings[3].rotation.z = Math.abs(Math.sin(time * fs + 0.5)) * 0.5 + 0.1;
                     playHappyPurr(true);
                 } else {
-                    // 2. Landed/Resting State: Sitting comfortably on user's hand
                     beeGroup.position.copy(activeTarget);
-                    
-                    // Face slightly forward resting flatly
                     beeGroup.rotation.set(0, beeGroup.rotation.y, 0);
-
-                    // Wings flap very gently like a calm breathing vibration
-                    const flapSpeed = 8;
-                    wings[0].rotation.z = -Math.abs(Math.sin(time * flapSpeed)) * 0.2 - 0.05;
-                    wings[1].rotation.z = -Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.15 - 0.05;
-                    wings[2].rotation.z = Math.abs(Math.sin(time * flapSpeed)) * 0.2 + 0.05;
-                    wings[3].rotation.z = Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.15 + 0.05;
-
+                    const fs = 8;
+                    wings[0].rotation.z = -Math.abs(Math.sin(time * fs)) * 0.2 - 0.05;
+                    wings[1].rotation.z = -Math.abs(Math.sin(time * fs + 0.5)) * 0.15 - 0.05;
+                    wings[2].rotation.z = Math.abs(Math.sin(time * fs)) * 0.2 + 0.05;
+                    wings[3].rotation.z = Math.abs(Math.sin(time * fs + 0.5)) * 0.15 + 0.05;
                     playHappyPurr(false);
                 }
             } else {
-                // 3. Hovering & Escape Behaviors (No hand targeted)
                 holographicTargetMesh.visible = false;
-
-                // Wing flapping scales based on activity
-                const flapSpeed = isDashing ? 65 : 32;
-                
+                const fs = isDashing ? 65 : 32;
                 if (wings.length >= 4) {
-                    wings[0].rotation.z = -Math.abs(Math.sin(time * flapSpeed)) * 0.7 - 0.1;
-                    wings[1].rotation.z = -Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 - 0.1;
-                    wings[2].rotation.z = Math.abs(Math.sin(time * flapSpeed)) * 0.7 + 0.1;
-                    wings[3].rotation.z = Math.abs(Math.sin(time * flapSpeed + 0.5)) * 0.5 + 0.1;
+                    wings[0].rotation.z = -Math.abs(Math.sin(time * fs)) * 0.7 - 0.1;
+                    wings[1].rotation.z = -Math.abs(Math.sin(time * fs + 0.5)) * 0.5 - 0.1;
+                    wings[2].rotation.z = Math.abs(Math.sin(time * fs)) * 0.7 + 0.1;
+                    wings[3].rotation.z = Math.abs(Math.sin(time * fs + 0.5)) * 0.5 + 0.1;
                 }
 
                 if (isDashing) {
-                    const durationElapsed = time - dashStartTime;
-                    const progress = Math.min(durationElapsed / dashDuration, 1);
-                    
-                    // Smooth ease-out cubic interpolation curve
+                    const progress = Math.min((time - dashStartTime) / dashDuration, 1);
                     const t = 1 - Math.pow(1 - progress, 3);
-
-                    // Parabolic curved coordinates mapping
                     const currentPos = new THREE.Vector3();
                     currentPos.lerpVectors(beeStartPos, beeEndPos, t);
                     currentPos.y += Math.sin(progress * Math.PI) * beeMidHeightOffset;
-
                     beeGroup.position.copy(currentPos);
                     beeGroup.rotation.y = beeRotationYStart + (beeRotationYEnd - beeRotationYStart) * t;
-
-                    if (progress >= 1) {
-                        isDashing = false;
-                    }
+                    if (progress >= 1) isDashing = false;
                 } else {
-                    // Hovering organically over target plane
-                    const hoverOffset = new THREE.Vector3(
+                    beeGroup.position.copy(new THREE.Vector3(
                         Math.sin(time * 1.6) * 0.1,
                         Math.cos(time * 1.2) * 0.08,
                         Math.sin(time * 0.8) * 0.06
-                    );
-                    beeGroup.position.copy(hoverOffset);
+                    ));
                     beeGroup.rotation.z = Math.sin(time * 1.8) * 0.05;
                     beeGroup.rotation.x = Math.cos(time * 1.1) * 0.04;
                 }
             }
 
-            // Leg twitching during flight
-            if (legsGroup) {
-                legsGroup.children.forEach((leg, index) => {
-                    leg.rotation.x = Math.sin(time * 6 + index) * 0.1;
-                });
-            }
-
-            // Antennae twitching
-            if (antennaeGroup) {
-                antennaeGroup.children.forEach((ant, index) => {
-                    ant.rotation.y = Math.sin(time * 8 + index) * 0.12;
-                });
-            }
+            if (legsGroup) legsGroup.children.forEach((leg, i) => leg.rotation.x = Math.sin(time * 6 + i) * 0.1);
+            if (antennaeGroup) antennaeGroup.children.forEach((ant, i) => ant.rotation.y = Math.sin(time * 8 + i) * 0.12);
 
             renderer.render(scene, camera);
         }
 
-        // Escape flight algorithm (Launches bee dynamically across entire 3D tracking frame)
         function onBeeClicked() {
             if (isDashing) return;
-
             arScore++;
             document.getElementById('ar-score').innerText = arScore;
-
             playBuzzSound();
 
             const scoreBadge = document.getElementById('ar-score').parentElement;
-            scoreBadge.classList.add('scale-125', 'text-amber-400');
-            setTimeout(() => {
-                scoreBadge.classList.remove('scale-125', 'text-amber-400');
-            }, 250);
+            scoreBadge.classList.add('scale-125');
+            setTimeout(() => scoreBadge.classList.remove('scale-125'), 250);
 
-            // Compute escape coordinates inside targets bounds
             isDashing = true;
             dashStartTime = clock.getElapsedTime();
-
             beeStartPos.copy(beeGroup.position);
-            
-            // Safe target boundaries offsets (normalized)
+
             const randX = (Math.random() - 0.5) * 1.2;
             const randY = (Math.random() - 0.5) * 1.0;
             const randZ = -0.2 + (Math.random() * 0.5);
-
             beeEndPos.set(randX, randY, randZ);
             beeMidHeightOffset = (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.3);
 
-            const deltaX = randX - beeStartPos.x;
-            const deltaZ = randZ - beeStartPos.z;
-            
             beeRotationYStart = beeGroup.rotation.y;
-            beeRotationYEnd = Math.atan2(deltaX, deltaZ);
+            beeRotationYEnd = Math.atan2(randX - beeStartPos.x, randZ - beeStartPos.z);
 
-            if (arScore === 1) {
-                showToast("¡Buen reflejo!", "La abeja sintió tu toque y escapó con fuerza hacia otra posición.", "success");
-            } else if (arScore === 5) {
-                showToast("¡Velocidad Apícola!", "Estás dominando la captura. Recuerda que este juego representa la reubicación de abejas.", "success");
-            }
+            if (arScore === 1) showToast("¡Buen reflejo!", "La abeja sintió tu toque y escapó con fuerza hacia otra posición.", "success");
+            else if (arScore === 5) showToast("¡Velocidad Apícola!", "Estás dominando la captura. Recuerda que este juego representa la reubicación de abejas.", "success");
         }
 
         function updateCalculator() {
             const honeyCount = parseInt(document.getElementById('calc-honey').value);
             const petTons = parseInt(document.getElementById('calc-pet').value);
-
             document.getElementById('calc-honey-val').innerText = `${honeyCount} ${honeyCount === 1 ? 'Frasco' : 'Frascos'}`;
             document.getElementById('calc-pet-val').innerText = `${petTons} ${petTons === 1 ? 'Tonelada' : 'Toneladas'}`;
-
-            const estimatedHours = Math.round((honeyCount * 2.5) + (petTons * 35));
-            const prostheticsFunded = Math.max(1, Math.floor(estimatedHours / 110));
-
-            document.getElementById('res-hours').innerText = `${estimatedHours} hrs`;
-            document.getElementById('res-prosthetics').innerText = `${prostheticsFunded}`;
+            const hours = Math.round((honeyCount * 2.5) + (petTons * 35));
+            const prosthetics = Math.max(1, Math.floor(hours / 110));
+            document.getElementById('res-hours').innerText = `${hours} hrs`;
+            document.getElementById('res-prosthetics').innerText = `${prosthetics}`;
         }
 
         function handleContactSubmit(event) {
             event.preventDefault();
-            
-            const name = document.getElementById('contact-name').value;
             const email = document.getElementById('contact-email').value;
             const type = document.getElementById('contact-type').value;
-
             let typeText = "Comprar Miel Premium";
             if (type === "sponsor") typeText = "Patrocinio de Prótesis";
             if (type === "beneficiary") typeText = "Postulación de Beneficiario";
             if (type === "recycle") typeText = "Donación de Reciclaje / Alianza";
-
-            showToast(
-                "¡Mensaje Recibido!",
-                `Gracias por contactarnos. Procesaremos tu solicitud sobre "${typeText}" y nos comunicaremos contigo a: ${email}.`,
-                "success"
-            );
-
+            showToast("¡Mensaje Recibido!", `Gracias por contactarnos. Procesaremos tu solicitud sobre "${typeText}" y nos comunicaremos contigo a: ${email}.`, "success");
             event.target.reset();
+        }
+
+        function initRevealAnimations() {
+            const items = document.querySelectorAll('.reveal');
+            if (!('IntersectionObserver' in window)) {
+                items.forEach(el => el.classList.add('is-visible'));
+                return;
+            }
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+            items.forEach(el => observer.observe(el));
         }
 
         window.onload = function () {
             updateCalculator();
+            initRevealAnimations();
+            const heroVideo = document.querySelector('.hero-video');
+            if (heroVideo) {
+                heroVideo.muted = true;
+                const p = heroVideo.play();
+                if (p && typeof p.catch === 'function') p.catch(() => {});
+            }
         };
     </script>
 </body>
